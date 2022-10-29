@@ -43,3 +43,7 @@ Thumbs.db
 
 # env folders #
 env/
+
+# data file #
+*.csv
+*.xlsx
