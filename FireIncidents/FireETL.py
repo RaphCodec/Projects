@@ -2,7 +2,7 @@ import pandas as pd
 import json
 import requests
 
-pd.options.display.max_columns = None
+#pd.options.display.max_columns = None
 
 def Extract(LINK):
     #loading data from api into dataframe
@@ -22,13 +22,10 @@ def Transform(df):
     df['incident_borough'] = df['incident_borough'].replace('RICHMOND / STATEN ISLAND', 'STATEN ISLAND')
     df['alarm_box_borough'] = df['alarm_box_borough'].replace('RICHMOND / STATEN ISLAND', 'STATEN ISLAND')
 
-    intcols = [
+    #transforming columns to apporpriate daata types
+    numcols = [
         'starfire_incident_id',
         'alarm_box_number',
-        'dispatch_response_seconds_qy',
-        'engines_assigned_quantity',
-        'incident_response_seconds_qy',
-        'incident_travel_tm_seconds_qy',
         'engines_assigned_quantity',
         'ladders_assigned_quantity',
         'other_units_assigned_quantity',
@@ -37,21 +34,38 @@ def Transform(df):
         'citycouncildistrict',
         'communitydistrict',
         'communityschooldistrict',
-        'congressionaldistrict'
+        'congressionaldistrict',
+        'dispatch_response_seconds_qy',
+        'incident_response_seconds_qy',
+        'incident_travel_tm_seconds_qy'
     ]
-    print(df[intcols])
 
-    df[intcols] = df[intcols].apply(pd.to_numeric)
+    df[numcols] = df[numcols].apply(pd.to_numeric)
     
+    datecols = [
+        'incident_datetime',
+        'first_assignment_datetime',
+        'first_activation_datetime',
+        'incident_close_datetime',
+        'first_on_scene_datetime'
+    ]
+
+    df[datecols] = df[datecols].apply([pd.to_datetime])
+
+    Load(df)
+
+def Load(df):
+    print(df.head())
+
+def main():
+    Extract(LINK)
+    print('Data Loaded.')
+
+#usuing json config to load hidden variables like link or sql names
+jsonConfig = open('Fire.config.json')
+config = json.load(jsonConfig)
+
+LINK = config['LINK']
 
 
-    print(df.dtypes)
-
-
-def Load():
-    print('y')
-
-
-
-LINK = 'https://data.cityofnewyork.us/resource/8m42-w767.json'
-Extract(LINK)
+main()
