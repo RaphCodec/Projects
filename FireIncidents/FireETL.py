@@ -159,8 +159,7 @@ def Load(df):
     df_update = df_merge[~pd.isna(df_merge['existing_ids'])]
     
     #updating xitsint records in database
-    df_update = df_update[[
-       'starfire_incident_id', 
+    df_update = df_update[[ 
        'incident_datetime', 
        'alarm_box_borough',
        'alarm_box_number', 
@@ -188,7 +187,8 @@ def Load(df):
        'communitydistrict',
        'communityschooldistrict', 
        'congressionaldistrict',
-       'first_on_scene_datetime'
+       'first_on_scene_datetime',
+       'starfire_incident_id'
     ]]
     
     update_stmt = f'''
