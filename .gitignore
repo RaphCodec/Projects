@@ -39,7 +39,8 @@ Thumbs.db
 # config files #
 ################
 *.config.json
-*.congif.py
+*.config.py
+*.config.toml
 
 # env folders #
 env/
