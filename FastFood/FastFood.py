@@ -26,12 +26,13 @@ print(len(df))
 df_cats = df.groupby('Category')
 gor = df_cats.get_group('GOURMET MENU')
 mccafe = df_cats.get_group('McCAFE MENU')
+cbb = df_cats.get_group('Cookies, Brownies & Bars')
 
 print(mccafe)
-
+print(df_cats.groups.keys())
 
 df = df.replace({'Hot Breakfast':'Breakfast','BREAKFAST MENU':'Breakfast','GOURMET MENU':'Drinks'})
-print(df['Category'].value_counts())
+#print(df['Category'].value_counts())
 
 sys.exit()
 
