@@ -30,11 +30,11 @@ def mk_dfs(data,to_remove,cols):
 
     return df
 
-def repeat_values(num, remove_last = True):
+def repeat_values(num,char ,remove_last = True):
     if remove_last == False:
-        return ('?,' * num)
+        return (char * num)
     else:
-        return ('?,' * num)[:-1]
+        return (char * num)[:-1]
     
 def insert(table,df,vals,cols):
     #create and connect to sqlite3 database
@@ -44,10 +44,9 @@ def insert(table,df,vals,cols):
     cur.execute(f'Create Table {table} ({cols})')
 
     #insert data into table
-    for i in range(len(df)):
-        cur.execute(f'''Insert into {table}
-                        values({vals}
-                        )''', df.iloc[i])
+    cur.executemany(f'''Insert into {table}
+                        values({vals})
+                        ''', df.values.tolist())
         
     conn.commit()
     conn.close #close conncection
@@ -86,9 +85,11 @@ def main():
     del reigns[reigns.index('April 6, 2014') + 8]
     del reigns[reigns.index('March 29, 2015') + 8]
 
-
+    #removing unnecssary '†' character so that creating df is possible later
     reigns=list(filter(lambda a: a != '†', reigns))
 
+    '''these are table values that identifiy the coompany name at the time
+        However they are not needed and create extra undesired elements in the dataframe'''
     to_remove = ['World Wide Wrestling Federation (WWWF)',
                 'National Wrestling Alliance: World Wide Wrestling Federation (WWWF)',
                 'National Wrestling Alliance: World Wrestling Federation (WWF)',
@@ -98,7 +99,7 @@ def main():
                 'WWE: ECW',
                 'WWE: Raw',
                 'WWE (unbranded)']
- 
+    #the column names
     cols = ['Champion',
             'Date',
             'Event',
@@ -108,13 +109,16 @@ def main():
             'DaysRecog',
             'Notes'
             ]
-
+    #creating df
     df = mk_dfs(reigns,to_remove, cols)
-
-    vals = repeat_values(8)
-
+    
+    #getting right number of values per row for insert
+    vals = repeat_values(8, char='?,')
+    
+    #foramtting col names for insert
     cols = ','.join(cols)
     
+    #inserting data into sqlite3 database
     insert('Champs',df,vals,cols)
 
 
