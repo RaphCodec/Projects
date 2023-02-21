@@ -2,43 +2,45 @@ import mechanicalsoup
 import pandas as pd
 import sqlite3
 import time
+import tomli
 
-def mk_dfs(data,to_remove,cols):
-    indices = [idx for idx, x in enumerate(data) if x in to_remove]
+def mk_dfs(data,cols:list,skip_num:int, to_remove:list = None):
+    if to_remove != None:
+        indices = [idx for idx, x in enumerate(data) if x in to_remove]
 
-    df_lst = []
-    for idx,x in enumerate(indices):
-        if idx == 0:
-            cop = data.copy()
-            cop = cop[:x -1]
-            df_lst.extend(cop)
-        elif x == indices[-1]:
-            cop = data.copy()
-            cop = cop[x+1:]
-            df_lst.extend(cop)
-        else:
-            cop = data.copy()
-            cop = cop[indices[idx-1] + 1 : x-1]
-            df_lst.extend(cop)
+        df_lst = []
+        for idx,x in enumerate(indices):
+            if idx == 0:
+                cop = data.copy()
+                cop = cop[:x -1]
+                df_lst.extend(cop)
+            elif x == indices[-1]:
+                cop = data.copy()
+                cop = cop[x+1:]
+                df_lst.extend(cop)
+            else:
+                cop = data.copy()
+                cop = cop[indices[idx-1] + 1 : x-1]
+                df_lst.extend(cop)
 
-    df_dict =  {} 
+        df_dict =  {} 
 
-    for idx, key in enumerate(cols):
-        df_dict[key] = df_lst[idx:][::9] 
+        for idx, key in enumerate(cols):
+            df_dict[key] = df_lst[idx:][::skip_num] 
 
-    df = pd.DataFrame(df_dict)
+        df = pd.DataFrame(df_dict)
 
     return df
 
-def repeat_values(num,char ,remove_last = True):
+def repeat_values(num:int,char:str ,remove_last = True):
     if remove_last == False:
         return (char * num)
     else:
         return (char * num)[:-1]
     
-def insert(table,df,vals,cols):
+def insert(table:str,df,vals:str,cols:str):
     #create and connect to sqlite3 database
-    conn = sqlite3.connect('WWEChamps.db')
+    conn = sqlite3.connect(DB)
     cur = conn.cursor()
     #create table
     cur.execute(f'Create Table {table} ({cols})')
@@ -52,11 +54,9 @@ def insert(table,df,vals,cols):
     conn.close #close conncection
 
 def main():
-    url = 'https://en.wikipedia.org/wiki/List_of_WWE_Champions'
-
     #making broswer object and opening url
     browser = mechanicalsoup.StatefulBrowser()
-    browser.open(url)
+    browser.open(URL)
 
     #getting all the data
     td = browser.page.find_all('td')
@@ -110,7 +110,7 @@ def main():
             'Notes'
             ]
     #creating df
-    df = mk_dfs(reigns,to_remove, cols)
+    df = mk_dfs(reigns,cols, 9, to_remove)
     
     #getting right number of values per row for insert
     vals = repeat_values(8, char='?,')
@@ -119,13 +119,20 @@ def main():
     cols = ','.join(cols)
     
     #inserting data into sqlite3 database
-    insert('Champs',df,vals,cols)
+    insert(TABLE,df,vals,cols)
 
 
 
 if __name__ == '__main__':
     start = time.time()
     try:
+        #loading config
+        with open('WWEChamps.config.toml', mode='rb') as fp:
+            config = tomli.load(fp)
+        URL = config['URL']
+        DB = config['DB']
+        TABLE = config['TABLE']
+
         main()
         executionTime = (time.time()- start)
         print(f'Execution time in seconds: {executionTime}')
