@@ -3,44 +3,21 @@ import pandas as pd
 import sqlite3
 import time
 import tomli
-
-def mk_dfs(data,cols:list,skip_num:int, to_remove:list = None):
-    if to_remove != None:
-        indices = [idx for idx, x in enumerate(data) if x in to_remove]
-
-        df_lst = []
-        for idx,x in enumerate(indices):
-            if idx == 0:
-                cop = data.copy()
-                cop = cop[:x -1]
-                df_lst.extend(cop)
-            elif x == indices[-1]:
-                cop = data.copy()
-                cop = cop[x+1:]
-                df_lst.extend(cop)
-            else:
-                cop = data.copy()
-                cop = cop[indices[idx-1] + 1 : x-1]
-                df_lst.extend(cop)
-
-        df_dict =  {} 
-
-        for idx, key in enumerate(cols):
-            df_dict[key] = df_lst[idx:][::skip_num] 
-
-        df = pd.DataFrame(df_dict)
-
-        df.insert(loc=0, column='ChampNum', value= df.index)
-
-    return df
     
 def insert(table:str,df):
     #create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
+
+    #checking if table already exists and creating it if it doesn't
+    tablst = cur.execute(
+        f"""SELECT name FROM sqlite_master WHERE type='table'
+        AND name='{table}' """).fetchall()
+    conn.commit()
     
-    #create table
-    cur.execute(f'Create Table {table} ({",".join(df.columns)})')
+    if not tablst:
+        #create table
+        cur.execute(f'Create Table {table} ({",".join(df.columns)})')
 
     #insert data into table
     cur.executemany(f'''Insert into {table}
@@ -60,7 +37,30 @@ def main():
     browser.close() #closing browser
 
     data  = [value.text.replace('\n','') for value in td]
+    titles(data)
+    reigns(data)
 
+def titles(data):
+    #slicing list to get data for each wwe championship change
+    titles = data[data.index('WWWF World Heavyweight Championship'):data.index('Undisputed WWE Universal Championship')+2]
+
+    cols = [
+        'Names',
+        'Years'
+    ]
+    df_dict =  {} 
+
+    for idx, key in enumerate(cols):
+        df_dict[key] = titles[idx:][::2] 
+
+    df = pd.DataFrame(df_dict)
+
+    #creating a column to count order of titles and act as a primary key
+    df.insert(loc=0, column='TitleNum', value= df.index)
+
+    insert(TABLE_TITLES, df)
+
+def reigns(data):
     #slicing list to get data for each wwe championship change
     reigns = data[data.index('Buddy Rogers'):data.index('[204]')+1] 
     
@@ -85,8 +85,9 @@ def main():
     #removing unnecssary '†' character so that creating df is possible later
     reigns=list(filter(lambda a: a != '†', reigns))
 
-    '''these are table values that identifiy the coompany name at the time
+    '''these are table values that identifiy the company name at the time
         However they are not needed and create extra undesired elements in the dataframe'''
+    
     to_remove = ['World Wide Wrestling Federation (WWWF)',
                 'National Wrestling Alliance: World Wide Wrestling Federation (WWWF)',
                 'National Wrestling Alliance: World Wrestling Federation (WWF)',
@@ -96,6 +97,9 @@ def main():
                 'WWE: ECW',
                 'WWE: Raw',
                 'WWE (unbranded)']
+    
+    #fiding the index numbers for the values in to remove if they are in the reigns list
+    indices = [idx for idx, x in enumerate(reigns) if x in to_remove]
 
     #the column names
     cols = ['Champion',
@@ -107,12 +111,38 @@ def main():
             'DaysRecog',
             'Notes'
             ]
-    #creating df
-    df = mk_dfs(reigns,cols, 9, to_remove)
+    #slcing reigns list to remove unwanted values and adding them to an empty list
+    df_lst = []
+    for idx,x in enumerate(indices):
+        if idx == 0:
+            cop = reigns.copy()
+            cop = cop[:x -1]
+            df_lst.extend(cop)
+        elif x == indices[-1]:
+            cop = reigns.copy()
+            cop = cop[x+1:]
+            df_lst.extend(cop)
+        else:
+            cop = reigns.copy()
+            cop = cop[indices[idx-1] + 1 : x-1]
+            df_lst.extend(cop)
+
+    #adding list values to corresponding columns in a dictionary
+    df_dict =  {} 
+
+    for idx, key in enumerate(cols):
+        df_dict[key] = df_lst[idx:][::9] 
     
+    #dict to dataframe
+    df = pd.DataFrame(df_dict)
+
+    df = df.replace("—", None) #removing uneeded character
+    
+    #creating a column to count order of champs and act as a primary key
+    df.insert(loc=0, column='ChampNum', value= df.index)
 
     #inserting data into sqlite3 database
-    insert(TABLE,df)
+    insert(TABLE_REIGNS,df)
 
 
 
@@ -122,9 +152,10 @@ if __name__ == '__main__':
         #loading config
         with open('WWEChamps.config.toml', mode='rb') as fp:
             config = tomli.load(fp)
-        URL = config['URL']
-        DB = config['DB']
-        TABLE = config['TABLE']
+        URL             = config['URL']
+        DB              = config['DB']
+        TABLE_REIGNS    = config['TABLE_REIGNS']
+        TABLE_TITLES    = config['TABLE_TITLES']
 
         main()
         executionTime = (time.time()- start)
