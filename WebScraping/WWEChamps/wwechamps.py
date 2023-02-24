@@ -30,24 +30,21 @@ def mk_dfs(data,cols:list,skip_num:int, to_remove:list = None):
 
         df = pd.DataFrame(df_dict)
 
-    return df
+        df.insert(loc=0, column='ChampNum', value= df.index)
 
-def repeat_values(num:int,char:str ,remove_last = True):
-    if remove_last == False:
-        return (char * num)
-    else:
-        return (char * num)[:-1]
+    return df
     
-def insert(table:str,df,vals:str,cols:str):
+def insert(table:str,df,cols:str):
     #create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
+    
     #create table
     cur.execute(f'Create Table {table} ({cols})')
 
     #insert data into table
     cur.executemany(f'''Insert into {table}
-                        values({vals})
+                        values({('?,' * len(df.columns))[:-1]})
                         ''', df.values.tolist())
         
     conn.commit()
@@ -99,6 +96,7 @@ def main():
                 'WWE: ECW',
                 'WWE: Raw',
                 'WWE (unbranded)']
+
     #the column names
     cols = ['Champion',
             'Date',
@@ -112,14 +110,11 @@ def main():
     #creating df
     df = mk_dfs(reigns,cols, 9, to_remove)
     
-    #getting right number of values per row for insert
-    vals = repeat_values(8, char='?,')
-    
     #foramtting col names for insert
-    cols = ','.join(cols)
-    
+    cols = ','.join(df.columns)
+
     #inserting data into sqlite3 database
-    insert(TABLE,df,vals,cols)
+    insert(TABLE,df,cols)
 
 
 
