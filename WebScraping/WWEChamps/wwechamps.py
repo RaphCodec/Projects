@@ -34,13 +34,13 @@ def mk_dfs(data,cols:list,skip_num:int, to_remove:list = None):
 
     return df
     
-def insert(table:str,df,cols:str):
+def insert(table:str,df):
     #create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
     
     #create table
-    cur.execute(f'Create Table {table} ({cols})')
+    cur.execute(f'Create Table {table} ({",".join(df.columns)})')
 
     #insert data into table
     cur.executemany(f'''Insert into {table}
@@ -110,11 +110,9 @@ def main():
     #creating df
     df = mk_dfs(reigns,cols, 9, to_remove)
     
-    #foramtting col names for insert
-    cols = ','.join(df.columns)
 
     #inserting data into sqlite3 database
-    insert(TABLE,df,cols)
+    insert(TABLE,df)
 
 
 
