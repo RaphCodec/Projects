@@ -24,6 +24,7 @@
 ######################
 *.log
 *.log.txt
+*.txt
 *.sql
 *.sqlite
 *.db
