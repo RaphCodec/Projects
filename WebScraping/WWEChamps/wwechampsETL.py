@@ -3,6 +3,7 @@ import pandas as pd
 import sqlite3
 from datetime import datetime
 import tomli
+import traceback
 
 log = open('wwechampsETL.log.txt','w')
             
@@ -11,15 +12,8 @@ def insert(table:str,df):
     conn = sqlite3.connect(DB)
     cur = conn.cursor()
 
-    #checking if table already exists and creating it if it doesn't
-    tablst = cur.execute(
-        f"""SELECT name FROM sqlite_master WHERE type='table'
-        AND name='{table}' """).fetchall()
-    conn.commit()
-    
-    if not tablst:
-        #create table
-        cur.execute(f'Create Table {table} ({",".join(df.columns)})')
+    #Create Table if not exists
+    cur.execute(f'Create Table IF NOT EXISTS {table} ({",".join(df.columns)})')
 
     #insert data into table
     cur.executemany(f'''Insert into {table}
@@ -166,7 +160,6 @@ if __name__ == '__main__':
         print( f"Using the following config:\n\n{ pformat(config, sort_dicts=False) }" )
         log.write(f'{"*" * 70}\nUsing the following config:\n\n{ pformat(config, sort_dicts=False) }\n\n' )
 
-
         main()
 
         executionTime = (datetime.now()- start).total_seconds()
@@ -176,7 +169,7 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(e)
-        log.write(f'{traceback.format_exc()}\n\n')
+        log.write(f'\n{traceback.format_exc()}\n\n')
         executionTime = (datetime.now()- start).total_seconds()
         print(f'Execution time in seconds: {executionTime}')
         log.write(f'\n{"*" * 70}\nScript Ended: {datetime.now()}\nExecution time in seconds: {executionTime}') 
