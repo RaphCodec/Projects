@@ -1,9 +1,17 @@
 import mechanicalsoup
 import pandas as pd
 import sqlite3
-import time
+from datetime import datetime
 import tomli
-    
+import logging
+
+logging.basicConfig(filename="wwechamps.log.txt", 
+					format='%(asctime)s %(message)s', 
+					filemode='w')
+
+logger=logging.getLogger()
+logger.setLevel(logging.DEBUG)
+            
 def insert(table:str,df):
     #create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
@@ -28,6 +36,7 @@ def insert(table:str,df):
     conn.close #close conncection
 
 def main():
+
     #making broswer object and opening url
     browser = mechanicalsoup.StatefulBrowser()
     browser.open(URL)
@@ -35,12 +44,14 @@ def main():
     #getting all the data
     td = browser.page.find_all('td')
     browser.close() #closing browser
-
+    
     data  = [value.text.replace('\n','') for value in td]
     titles(data)
     reigns(data)
+    logger.info('Data Loaded') 
 
 def titles(data):
+    #global logmsg
     #slicing list to get data for each wwe championship change
     titles = data[data.index('WWWF World Heavyweight Championship'):data.index('Undisputed WWE Universal Championship')+2]
 
@@ -59,6 +70,8 @@ def titles(data):
     df.insert(loc=0, column='TitleNum', value= df.index)
 
     insert(TABLE_TITLES, df)
+
+    #logmsg += 'Titles Data Loaded.'
 
 def reigns(data):
     #slicing list to get data for each wwe championship change
@@ -145,22 +158,33 @@ def reigns(data):
     insert(TABLE_REIGNS,df)
 
 
-
 if __name__ == '__main__':
-    start = time.time()
+    start = datetime.now()
+    logger.info('Script Started\n\n')
+    with open('WWEChamps.config.toml', mode='rb') as fp:
+        config = tomli.load(fp)
+    URL             = config['URL']
+    DB              = config['DB']
+    TABLE_REIGNS    = config['TABLE_REIGNS']
+    TABLE_TITLES    = config['TABLE_TITLES']
+
     try:
-        #loading config
-        with open('WWEChamps.config.toml', mode='rb') as fp:
-            config = tomli.load(fp)
-        URL             = config['URL']
-        DB              = config['DB']
-        TABLE_REIGNS    = config['TABLE_REIGNS']
-        TABLE_TITLES    = config['TABLE_TITLES']
+        from pprint import pformat
+        print( f"Using the following config:\n\n{ pformat(config, sort_dicts=False) }" )
+
+        logger.info(f'Using the following config:\n\n{ pformat(config, sort_dicts=False)}\n\n')
 
         main()
-        executionTime = (time.time()- start)
+
+        executionTime = (datetime.now()- start).total_seconds()
         print(f'Execution time in seconds: {executionTime}')
+        logger.info('Script Ended\n')
+        logger.info(f'Execution Time: {executionTime} seconds\n') 
+
     except Exception as e:
         print(e)
-        executionTime = (time.time()- start)
+        logger.exception("Error occurred:\n")
+        executionTime = (datetime.now()- start).total_seconds()
         print(f'Execution time in seconds: {executionTime}')
+        logger.info('Script Ended\n')
+        logger.info(f'Execution Time: {executionTime} seconds\n') 
