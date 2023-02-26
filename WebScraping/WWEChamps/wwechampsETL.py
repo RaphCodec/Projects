@@ -38,7 +38,6 @@ def main():
     reigns(data)
 
 def titles(data):
-    #global logmsg
     #slicing list to get data for each wwe championship change
     titles = data[data.index('WWWF World Heavyweight Championship'):data.index('Undisputed WWE Universal Championship')+2]
 
@@ -57,8 +56,6 @@ def titles(data):
     df.insert(loc=0, column='TitleNum', value= df.index)
 
     insert(TABLE_TITLES, df)
-
-    #logmsg += 'Titles Data Loaded.'
 
 def reigns(data):
     #slicing list to get data for each wwe championship change
@@ -143,7 +140,6 @@ def reigns(data):
 
     #inserting data into sqlite3 database
     insert(TABLE_REIGNS,df)
-
 
 if __name__ == '__main__':
     start = datetime.now()
