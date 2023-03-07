@@ -5,8 +5,8 @@ from datetime import datetime
 import tomli
 import traceback
 
-log = open('wwechampsETL.log.txt','w')
-            
+log = open('wwechamps.log.txt','w')
+
 def insert(table:str,df):
     #create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
@@ -133,8 +133,12 @@ def reigns(data):
     #dict to dataframe
     df = pd.DataFrame(df_dict)
 
-    df = df.replace("—", None) #removing uneeded character
-    
+    df                              =   df.replace("—", None) #removing uneeded character
+    df                              =   df.replace("", None)  #removing uneeded character
+    df[['Days','DaysRecog']]        =   df[['Days','DaysRecog']].replace(regex=",", value='')  #removing uneeded character
+    df[['Days','DaysRecog']]        =   df[['Days','DaysRecog']].replace(regex="<1", value='.5')  #removing uneeded character
+    df[['Days','DaysRecog']]        =   df[['Days','DaysRecog']].replace("+", '')  #removing uneeded character
+
     #creating a column to count order of champs and act as a primary key
     df.insert(loc=0, column='ChampNum', value= df.index)
 
