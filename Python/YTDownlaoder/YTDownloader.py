@@ -2,48 +2,30 @@ from pytube import YouTube
 from datetime import datetime
 import tomli
 import traceback
-import glob
-import os
-from pathlib import Path
 
 log = open('YTDownloader.log.txt','w')
 
-# Function to get user input restricted to "yes" or "no"
-def get_yes_no_input(prompt):
+# Function to get user input restricted to "audio" or "cideo"
+def restricted_input(prompt):
     while True:
         user_input = input(prompt).lower()
-        if user_input == 'yes' or user_input == 'no':
+        if user_input == 'audio' or user_input == 'video':
             return user_input
         else:
-            print("Invalid input. Please enter 'yes' or 'no'.")
+            print("Invalid input. Please enter 'audio' or 'video'.")
 
 def main():
-    ytDownlaod(url = input('Enter a youtube link:'))
-    
-    mp3 = get_yes_no_input('Would you like an mp3 download?')
-    if mp3 == 'yes':
-        print('Converting to mp3')
-        MP3()
-        print('Enjoy!')
+    file_type = restricted_input('Would you like Audio or Video?')
+    ytDownlaod(url = input('Enter a youtube link:'),file_type=file_type)
+
+def ytDownlaod(url, file_type):
+    yt = YouTube(url) #creates Youtube object
+
+    if file_type == 'audio':
+        yd = yt.streams.filter(only_audio=True).first() #creates mp4 audio file
     else:
-        print('Enjoy!')
-
-def MP3():
-    #getting a list of all mp4 files in folder
-    files = glob.glob(FOLDER_PATH + '/*.mp4')
-    #get the last added mp4 file in the folder
-    latest_file = max(files, key=os.path.getctime)
-    #changing the file extension to mp3 from mp4
-    p = Path(latest_file)
-    p.rename(p.with_suffix('.mp3'))
-
-
-def ytDownlaod(url):
-    yt = YouTube(url)
-
-    print(yt.thumbnail_url)
-
-    yd = yt.streams.get_highest_resolution()
+        yd = yt.streams.get_highest_resolution() #creates mp4 vidoe file
+    #sends file to desired directory
     yd.download(output_path=FOLDER_PATH)
     
     print('Finished Downlaoding')
