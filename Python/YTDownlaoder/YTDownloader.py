@@ -39,7 +39,6 @@ if __name__ == '__main__':
 
     FOLDER_PATH     = config['FOLDER_PATH']
     
-
     try:
         from pprint import pformat
         print( f"Using the following config:\n\n{ pformat(config, sort_dicts=False) }" )
