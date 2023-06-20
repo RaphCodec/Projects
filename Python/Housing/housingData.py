@@ -6,6 +6,8 @@ import sqlite3
 import tomli
 import sqlalchemy as sq
 import traceback
+import platform
+import psutil
 
 log = open('HousingData.log.txt','w')
 
@@ -64,11 +66,30 @@ def main():
 
 
     # Insert into SQL Server
-    #df.to_sql(name='HousingData', con=con, index=False, if_exists='replace', chunksize=1000)
+    df.to_sql(name='HousingData', con=con, index=False, if_exists='replace', chunksize=1000)
 
 if __name__ == '__main__':
     start = datetime.now()
+    uname = platform.uname()
     log.write(f'Script Started: {start}\n\n')
+    log.write(f''' System Information:
+    System: {uname.system}'
+    Version: {uname.version}'
+    Processor: {uname.processor}
+    CPU Cores: {psutil.cpu_count(logical=False)}
+    CPU Threads: {psutil.cpu_count(logical=True)}
+    Max Frequency: {psutil.cpu_freq().max:.2f} Mhz
+    Total Memory: {psutil.virtual_memory().total / (1024 ** 3):.2f} GB
+    ''')
+    print(f''' System Information:
+    System: {uname.system}'
+    Version: {uname.version}'
+    Processor: {uname.processor}
+    CPU Cores: {psutil.cpu_count(logical=False)}
+    CPU Threads: {psutil.cpu_count(logical=True)}
+    Max Frequency: {psutil.cpu_freq().max:.2f} Mhz
+    Total Memory: {psutil.virtual_memory().total / (1024 ** 3):.2f} GB
+    ''')
     with open('HousingData.config.toml', mode='rb') as fp:
         config = tomli.load(fp)
     SERVER             = config['SERVER']
