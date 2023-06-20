@@ -50,3 +50,6 @@ env/
 # data file #
 *.csv
 *.xlsx
+
+# streamlit configs #
+*.streamlit
