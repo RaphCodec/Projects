@@ -3,6 +3,11 @@ import random
 from datetime import datetime, timedelta
 import string
 import sqlite3
+import tomli
+import sqlalchemy as sq
+import traceback
+
+log = open('HousingData.log.txt','w')
 
 # Set a random seed for reproducibility
 random.seed(123)
@@ -28,28 +33,64 @@ def generate_dummy_data(num_rows):
     df = pd.DataFrame(data)
     return df
 
-# Generate the main DataFrame with 100 rows initially
-df = generate_dummy_data(100)
+def main():
+    # Generate the main DataFrame with n rows initially
+    df = generate_dummy_data(1_000_000)
 
-# Generate the column descriptions DataFrame
-column_descriptions = pd.DataFrame([
-    ['ID', 'Unique ID for each row. Cannot be null'],
-    ['HouseName', 'Name for each house. Cannot be null'],
-    ['Description', 'Description with 1000 characters or less'],
-    ['OnMarketDate', 'Date the house went on the market'],
-    ['SoldDate', 'Date the house was sold. Null if not sold yet'],
-    ['InitialPrice', 'Initial asking price for the home (rounded to 2 decimal places)'],
-    ['SoldPrice', 'Price the house was sold for. Could be higher, lower, or equal to initial price (rounded to 2 decimal places)']
-], columns=['Column', 'Description'])
+    # Generate the column descriptions DataFrame
+    column_descriptions = pd.DataFrame([
+        ['ID', 'Unique ID for each row. Cannot be null'],
+        ['HouseName', 'Name for each house. Cannot be null'],
+        ['Description', 'Description with 1000 characters or less'],
+        ['OnMarketDate', 'Date the house went on the market'],
+        ['SoldDate', 'Date the house was sold. Null if not sold yet'],
+        ['InitialPrice', 'Initial asking price for the home (rounded to 2 decimal places)'],
+        ['SoldPrice', 'Price the house was sold for. Could be higher, lower, or equal to initial price (rounded to 2 decimal places)']
+    ], columns=['Column', 'Description'])
 
-# Display the main DataFrame and column descriptions DataFrame
-print("Main DataFrame:")
-print(df.head())
-print("\nColumn Descriptions DataFrame:")
-print(column_descriptions)
+    # Display the main DataFrame and column descriptions DataFrame
+    print("Main DataFrame:")
+    print(df.head())
+    print("\nColumn Descriptions DataFrame:")
+    print(column_descriptions)
 
 
-# Insert Data into sqlite database
-conn = sqlite3.connect('HousingData.db')
-df.to_sql(name='HousingData', con=conn, index=False)
-column_descriptions.to_sql(name='ColumnDesc', con=conn, index=False)
+    database_con = f'mssql://@{SERVER}/{DATABASE}?driver={DRIVER}'
+    engine = sq.create_engine(database_con, fast_executemany=True)
+    con = engine.connect()
+
+    # # Insert Data into sqlite database
+    # conn = sqlite3.connect('HousingData.db')
+
+
+    # Insert into SQL Server
+    #df.to_sql(name='HousingData', con=con, index=False, if_exists='replace', chunksize=1000)
+
+if __name__ == '__main__':
+    start = datetime.now()
+    log.write(f'Script Started: {start}\n\n')
+    with open('HousingData.config.toml', mode='rb') as fp:
+        config = tomli.load(fp)
+    SERVER             = config['SERVER']
+    DATABASE           = config['DATABASE']
+    DRIVER             = config['DRIVER']
+
+    try:
+        from pprint import pformat
+        print( f"Using the following config:\n\n{ pformat(config, sort_dicts=False) }\n\n{'*' * 70}" )
+        log.write(f'Using the following config:\n\n{ pformat(config, sort_dicts=False) }\n\n{"*" * 70}' )
+
+        main()
+
+        executionTime = (datetime.now()- start).total_seconds()
+        print(f'{"*" * 70}\nExecution time in seconds: {executionTime}')
+        log.write(f'\n{"*" * 70}\nScript Ended: {datetime.now()}\nExecution time in seconds: {executionTime}') 
+        log.close()
+
+    except Exception as e:
+        print(e)
+        log.write(f'\n{traceback.format_exc()}\n\n')
+        executionTime = (datetime.now()- start).total_seconds()
+        print(f'{"*" * 70}\nExecution time in seconds: {executionTime}')
+        log.write(f'\n{"*" * 70}\nScript Ended: {datetime.now()}\nExecution time in seconds: {executionTime}') 
+        log.close()

@@ -1,0 +1,22 @@
+This is log of why I did things a certain way or changed things.
+
+6/20/2023
+    - Changed the database to SQL Server because it is what I am most familiar with.
+        - the to_sql method is conveinet for this project as I am primairly focused
+          on the Streamlit aspect of this proejct.  I really want to display the data
+          in a user friendly way and test readding and inserting/updating data with 
+          Streamlit.  The data and table schema are therefore not as important to me
+          or this.
+          That being said I think to_sql is conveient but I don't think I would use it for
+          projects with real data, unless the data was very simple.  It uses real data types
+          and maxamizes the precsion for all columns, which I don't think is a practical way
+          of creating tables.  That being said, I'm not completely familiar with to_sql and 
+          I'll have to use it more.
+    - Changed the number of rows to 1 million rows.  I just wanted more data to play with.  
+      If necessary I'll reduce the number of rows in the future but it shouldn't be a problem.
+      I also wanted to sww how long it took to insert the data, which has been consistently 
+      just over 2 minutes.  Going forward or maybe even for this project I will switch from pandas
+      to polars which should increase speed.
+    - The data has nulls for some SoldDate values and a I realized that the SoldPrice for those dates 
+      should also be null.  I plan to correct this, however as stated the data is not the most important
+      part of the project as I am more interested in the functionality of Streamlit.
