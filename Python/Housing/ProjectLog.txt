@@ -20,3 +20,8 @@ This is log of why I did things a certain way or changed things.
     - The data has nulls for some SoldDate values and a I realized that the SoldPrice for those dates 
       should also be null.  I plan to correct this, however as stated the data is not the most important
       part of the project as I am more interested in the functionality of Streamlit.
+
+
+    - IMPORTANT : If using windows streamlit has to be run through ANACONDA.  I found that using it
+      without ANACONDA causes errors such as the app not stopping properly when hitting CTRL + C and
+      some attributes, such as data_editor or st.cache_resource not executing at all.  Start the environment from ANACONDA.

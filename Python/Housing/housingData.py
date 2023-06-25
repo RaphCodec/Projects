@@ -8,6 +8,7 @@ import sqlalchemy as sq
 import traceback
 import platform
 import psutil
+import shortuuid
 
 log = open('HousingData.log.txt','w')
 
@@ -23,7 +24,7 @@ def generate_dummy_data(num_rows):
     ]
 
     data = {
-        'ID': range(1, num_rows + 1),
+        'ID': shortuuid.ShortUUID().random(length=4),
         'HouseName': ['House ' + str(i) for i in range(1, num_rows + 1)],
         'Description': [random.choice(descriptions) for _ in range(num_rows)],
         'OnMarketDate': [datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365)) for _ in range(num_rows)],
@@ -37,7 +38,7 @@ def generate_dummy_data(num_rows):
 
 def main():
     # Generate the main DataFrame with n rows initially
-    df = generate_dummy_data(1_000_000)
+    df = generate_dummy_data(100)
 
     # Generate the column descriptions DataFrame
     column_descriptions = pd.DataFrame([
