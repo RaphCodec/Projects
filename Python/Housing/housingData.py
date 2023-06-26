@@ -9,6 +9,7 @@ import traceback
 import platform
 import psutil
 import shortuuid
+import sys
 
 log = open('HousingData.log.txt','w')
 
@@ -34,6 +35,14 @@ def generate_dummy_data(num_rows):
 
     df = pd.DataFrame(data)
     df['ID'] = [shortuuid.ShortUUID().random(length=4) for i in range(len(df))]
+    
+    #needed to detect None/null values in the soldDate column
+    df = df.astype(object).where(pd.notnull(df), None)
+    #changing SoldPrice to none where SoldDate is None
+    for idx,date in enumerate(df['SoldDate']):
+        if date == None:
+            df.at[idx, 'SoldPrice'] = None
+    
     return df
 
 def main():
