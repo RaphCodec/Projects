@@ -13,6 +13,8 @@ def init_connection():
 
 
 def insert(df):
+    #Changing Nulls to None so that They insert properly on the SQL SERVER end
+    df = df.astype(object).where(pd.notnull(df), None)
     insert_stmt = f'''
     INSERT INTO {st.secrets["TABLE"]}(
        [ID]
@@ -31,7 +33,6 @@ def insert(df):
     cur = conn.cursor()
     cur.executemany(insert_stmt, df.values.tolist())
     conn.commit()
-    conn.close()
 
 
 PAGE_TITLE = 'Insert New Data'

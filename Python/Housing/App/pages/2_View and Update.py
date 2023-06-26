@@ -2,14 +2,25 @@ import streamlit as st
 import pandas as pd
 import pyodbc
 
-def update(edited_df,df):
-    df_merge    = pd.merge(df, edited_df, how='left', left_on='ID', right_on='ID')
-    
-    df_merge.to_csv('test.csv', index = False)
-
-
-    #insert new data into the table
-    # df_insert   = df_merge[ pd.isna(df_merge['existing_id']) ]
+def update(df, conn):
+    #Changing Nulls to None so that They update properly on the SQL SERVER end
+    df = df.astype(object).where(pd.notnull(df), None)
+    #updating data
+    update_stmt = f'''
+    UPDATE {st.secrets["TABLE"]}
+    SET
+       [HouseName]          = ?
+       ,[Description]       = ?
+       ,[OnMarketDate]      = ?
+       ,[SoldDate]          = ?
+       ,[InitialPrice]      = ?
+       ,[SoldPrice]         = ?
+    WHERE
+        [ID]                = ?
+    '''
+    cur = conn.cursor()
+    cur.executemany(update_stmt, df.values.tolist())
+    conn.commit()
 
 #this pae config section must always be the first sction of code
 PAGE_TITLE = 'View and Update Data'
@@ -32,7 +43,15 @@ conn = init_connection()
 df = pd.read_sql(f'SELECT * FROM {st.secrets["TABLE"]}', con=conn)
 
 column_config = {
-    'ID': None
+    'ID': None,
+    'OnMarketDate':st.column_config.DateColumn(
+            "On Market Date",
+            format="DD.MM.YYYY",
+            step=1),
+    'SoldDate':st.column_config.DateColumn(
+            "Sold Date",
+            format="DD.MM.YYYY",
+            step=1)
 }
 
 edited_df = st.data_editor(df, column_config = column_config, num_rows = 'dynamic')
@@ -41,5 +60,6 @@ edited_df = st.data_editor(df, column_config = column_config, num_rows = 'dynami
 st.markdown(f'You are viewing {len(edited_df)} rows')
 
 if st.button('save'):
-    update(df,edited_df)
+    st.write('Saving. Please Wait.')
+    update(edited_df, conn)
     st.write('SAVED!')
