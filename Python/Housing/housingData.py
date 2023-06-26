@@ -9,7 +9,6 @@ import traceback
 import platform
 import psutil
 import shortuuid
-import sys
 
 log = open('HousingData.log.txt','w')
 

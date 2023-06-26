@@ -54,12 +54,12 @@ column_config = {
             step=1)
 }
 
-edited_df = st.data_editor(df, column_config = column_config, num_rows = 'dynamic')
+edited_df = st.data_editor(df, column_config = column_config)
 
 
 st.markdown(f'You are viewing {len(edited_df)} rows')
 
-if st.button('save'):
+if st.button('Save'):
     st.write('Saving. Please Wait.')
     update(edited_df, conn)
     st.write('SAVED!')

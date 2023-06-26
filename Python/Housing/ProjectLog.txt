@@ -49,3 +49,20 @@ This is log of why I did things a certain way or changed things.
     - Also ned to figure out how many rows the data_editor can manage.  1,000,000 was too much and realistically
       you're not going to view that much data at a time. however, I was to see if there is a way to search the
       table by ID or something and return the appropriate rows.
+
+  6/26/2023
+    - Finished intial phase on the project.  Both the insert and update functions work.  Insert only inserts one
+      row at a time right now, which I'd like to change to insert multiple.
+    
+    - The data_editor works to update data,and column can be sorted in alphabetical and/or incresing/decreasing values.
+      However, I want to figure outa way to add the ability to filter and search the rows in the data_editor, especially
+      for larger amounts of data.I don't know if it's possible to do so with the data_editor right now as I believe it
+      is a relatively newfeature in streamlit.  I did a quick google search and found that AgGrid is apparently
+      compatible with streamlit,so I will most likely repalce the data_editor with AgGrid.  That should also give
+      me some pivotting features.The update function is working though so I hope that I won't have to change that if I
+      switch to AgGrid.
+      
+    - Some meterics and a plotly grpah have been added to the main page to show some possible analysis with
+      streamlit.  I'm not working with much data so there aren't much metrics/charts I could think to make right now,
+      but the functionality shows, which is what I'm most concerned with.  THough I may add a couple more metrics/charts 
+      and try to stylize them.
