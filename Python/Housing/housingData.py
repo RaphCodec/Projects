@@ -24,7 +24,6 @@ def generate_dummy_data(num_rows):
     ]
 
     data = {
-        'ID': shortuuid.ShortUUID().random(length=4),
         'HouseName': ['House ' + str(i) for i in range(1, num_rows + 1)],
         'Description': [random.choice(descriptions) for _ in range(num_rows)],
         'OnMarketDate': [datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365)) for _ in range(num_rows)],
@@ -34,6 +33,7 @@ def generate_dummy_data(num_rows):
     }
 
     df = pd.DataFrame(data)
+    df['ID'] = [shortuuid.ShortUUID().random(length=4) for i in range(len(df))]
     return df
 
 def main():
