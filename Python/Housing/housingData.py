@@ -24,12 +24,12 @@ def generate_dummy_data(num_rows):
     ]
 
     data = {
-        'HouseName': ['House ' + str(i) for i in range(1, num_rows + 1)],
-        'Description': [random.choice(descriptions) for _ in range(num_rows)],
-        'OnMarketDate': [datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365)) for _ in range(num_rows)],
-        'SoldDate': [datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365)) if random.random() < 0.5 else None for _ in range(num_rows)],
-        'InitialPrice': [round(random.uniform(100000, 500000), 2) for _ in range(num_rows)],
-        'SoldPrice': [round(random.uniform(80000, 600000), 2) for _ in range(num_rows)]
+    'HouseName': ['House ' + str(i) for i in range(1, num_rows + 1)],
+    'Description': [random.choice(descriptions) for _ in range(num_rows)],
+    'OnMarketDate': [(datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365))).date() for _ in range(num_rows)],
+    'SoldDate': [(datetime(2022, 1, 1) + timedelta(days=random.randint(1, 365))).date() if random.random() < 0.5 else None for _ in range(num_rows)],
+    'InitialPrice': [round(random.uniform(100000, 500000), 2) for _ in range(num_rows)],
+    'SoldPrice': [round(random.uniform(80000, 600000), 2) for _ in range(num_rows)]
     }
 
     df = pd.DataFrame(data)
