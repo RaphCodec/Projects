@@ -18,7 +18,7 @@ PAGE_TITLE = 'Housing Project | Raphael Clifton'
 PAGE_ICON = ':house:'
 
 
-st.set_page_config(page_title = PAGE_TITLE, page_icon = PAGE_ICON)
+st.set_page_config(page_title = PAGE_TITLE, page_icon = PAGE_ICON, layout = 'wide')
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
