@@ -46,7 +46,7 @@ def generate_dummy_data(num_rows):
 
 def main():
     # Generate the main DataFrame with n rows initially
-    df = generate_dummy_data(100)
+    df = generate_dummy_data(int(input('How many rows woudl you like?pytho')))
 
     # Generate the column descriptions DataFrame
     column_descriptions = pd.DataFrame([
