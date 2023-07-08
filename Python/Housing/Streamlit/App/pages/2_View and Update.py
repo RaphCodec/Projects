@@ -1,6 +1,7 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import time
 import pyodbc
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode, GridUpdateMode
 
@@ -121,7 +122,10 @@ go = gb.build()
 grid_return = AgGrid(df, gridOptions=go, height = 800)
 
 if st.button('Save'):
-    st.write('Saving. Please Wait.')
+    message = st.empty() #creates a placeholder for message
+    message.text('Saving. Please Wait.') #replaces message with new message
     edited_df = grid_return['data']
     update(edited_df, conn)
-    st.write('SAVED!')
+    message.text('SAVED!')
+    time.sleep(3) #wait 3 seconds before clear message
+    message.empty() #clears message object
