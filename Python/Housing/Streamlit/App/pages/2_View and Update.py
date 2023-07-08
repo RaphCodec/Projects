@@ -5,10 +5,13 @@ import pyodbc
 from st_aggrid import AgGrid, GridOptionsBuilder, JsCode, GridUpdateMode
 
 def update(df, conn):
-    df
-    df[['OnMarketDate','SoldDate']].apply(pd.to_datetime)
+    #correcting datatypes returned from AgGrid
+    df[['OnMarketDate','SoldDate']] = pd.to_datetime(df[['OnMarketDate','SoldDate']].stack(), errors='coerce').unstack()
+    df[['InitialPrice','SoldPrice']] = df[['InitialPrice','SoldPrice']].apply(pd.to_numeric, errors ='coerce')
+
     #Changing Nulls to None so that They update properly on the SQL SERVER end
     df = df.astype(object).where(pd.notnull(df), None)
+    
     #updating data
     update_stmt = f'''
     UPDATE {st.secrets["TABLE"]}
@@ -82,9 +85,8 @@ gb.configure_column(
     field="OnMarketDate",
     header_name="On Market Date",
     flex=1,
-    type=['dateColumn'],
-    valueFormatter="(value !== undefined && Date.parse(value) !== NaN) ? new Date(value).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''",
-)
+    type=["customDateTimeFormat"],
+    custom_format_string='yyyy-MM-dd')
 
 gb.configure_column(
     field="InitialPrice",
@@ -98,8 +100,8 @@ gb.configure_column(
     field="SoldDate",
     header_name="Sold Date",
     flex=1,
-    type=['dateColumn'],
-    valueFormatter="(value !== undefined && Date.parse(value) !== NaN) ? new Date(value).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''",
+    type=["customDateTimeFormat"],
+    custom_format_string='yyyy-MM-dd'
 )
 
 gb.configure_column(
