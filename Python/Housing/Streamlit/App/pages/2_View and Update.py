@@ -46,9 +46,7 @@ conn = init_connection()
 
 df = pd.read_sql(f'SELECT * FROM {st.secrets["TABLE"]}', con=conn)
 
-shouldDisplayPivoted = st.checkbox('Pivot Data on On Markt Date')
-
-gb = GridOptionsBuilder()
+gb = GridOptionsBuilder() #used to define gridOptions dictionary
 
 # makes columns resizable, sortable and filterable by default
 gb.configure_default_column(
@@ -60,7 +58,9 @@ gb.configure_default_column(
     groupable=True,
     value=True,
     enableRowGroup=True,
-    aggFunc='sum'
+    aggFunc='sum',
+    rowDrag = True,
+    enablePivot = True,
 )
 
 gb.configure_column(
@@ -68,7 +68,6 @@ gb.configure_column(
     header_name="Name",
     flex=1,
     tooltipField="Name",
-    aggFunc = 'count',
 )
 
 gb.configure_column(
@@ -76,14 +75,15 @@ gb.configure_column(
     header_name="Description",
     flex=1,
     tooltipField="Description",
+    aggFunc = 'count',
 )
 
 gb.configure_column(
     field="OnMarketDate",
     header_name="On Market Date",
     flex=1,
+    type=['dateColumn'],
     valueFormatter="(value !== undefined && Date.parse(value) !== NaN) ? new Date(value).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''",
-    pivot = True, #enable pivoting
 )
 
 gb.configure_column(
@@ -91,7 +91,6 @@ gb.configure_column(
     header_name="Initial Price",
     flex=1,
     type=["numericColumn"],
-    pivot = True,
     aggFunc = 'sum'
 )
 
@@ -99,6 +98,7 @@ gb.configure_column(
     field="SoldDate",
     header_name="Sold Date",
     flex=1,
+    type=['dateColumn'],
     valueFormatter="(value !== undefined && Date.parse(value) !== NaN) ? new Date(value).toLocaleDateString('en-US', { dateStyle: 'medium' }) : ''",
 )
 
@@ -109,11 +109,14 @@ gb.configure_column(
     type=["numericColumn"],
 )
 
+gb.configure_side_bar()
+gb.configure_selection(selection_mode = 'multiple')
+
 #makes tooltip appear instantly
-gb.configure_grid_options(tooltipShowDelay=0, pivotMode = shouldDisplayPivoted)
+gb.configure_grid_options(tooltipShowDelay=0)
 go = gb.build()
 
-grid_return = AgGrid(df, gridOptions=go, height = 400)
+grid_return = AgGrid(df, gridOptions=go, height = 800)
 
 if st.button('Save'):
     st.write('Saving. Please Wait.')
