@@ -4,16 +4,7 @@ import platform
 import pyodbc
 import plotly.express as px
 
-def update(edited_df,df):
-    df_merge    = pd.merge(df, edited_df, how='left', left_on='ID', right_on='ID')
-    
-    df_merge.to_csv('test.csv', index = False)
-
-
-    #insert new data into the table
-    # df_insert   = df_merge[ pd.isna(df_merge['existing_id']) ]
-
-#this pae config section must always be the first sction of code
+#this page config section must always be the first sction of streamlit code
 PAGE_TITLE = 'Housing Project | Raphael Clifton'
 PAGE_ICON = ':house:'
 
@@ -36,13 +27,6 @@ conn = init_connection()
 # Perform query.
 # Uses st.cache_data to only rerun when the query changes or after 10 min.
 # @st.cache_data(ttl=600)
-# def run_query(query):
-#     with conn.cursor() as cur:
-#         cur.execute(query)
-#         return cur.fetchall()
-
-# rows = run_query("SELECT * from HousingData;")
-
 df = pd.read_sql(f'SELECT * FROM {st.secrets["TABLE"]}', con=conn)
 
 st.title('Housing Data')
