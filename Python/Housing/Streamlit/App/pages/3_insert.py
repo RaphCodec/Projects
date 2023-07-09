@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import pyodbc
 import shortuuid
+import time
 
 def init_connection():
     return pyodbc.connect(
@@ -41,9 +42,6 @@ PAGE_ICON = ':smile:'
 
 st.set_page_config(page_title = PAGE_TITLE, page_icon = PAGE_ICON)
 
-
-
-
 with st.form("my_form"):
    st.write("Insert Housing Data")
    Name = st.text_input('Enter House Name', max_chars = 100)
@@ -56,7 +54,6 @@ with st.form("my_form"):
    # Every form must have a submit button.
    submitted = st.form_submit_button("Submit")
    if submitted:
-       st.write('Inserting the follwoing data:')
        data = {
            'ID':shortuuid.ShortUUID().random(length=4),
            'HouseName':Name,
@@ -67,6 +64,11 @@ with st.form("my_form"):
            'SoldPrice':[SoldPrice]
        }
        df = pd.DataFrame(data = data)
-       st.write(df)
+       message = st.empty()
+       message.text('Uploading data. Please wait.')
        insert(df)
-       st.write('Data Inserted')
+       with message.container():
+           st.write('Data Uploaded')
+           st.write(df)
+       time.sleep(5)
+       message.empty()
