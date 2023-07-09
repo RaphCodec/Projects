@@ -27,12 +27,13 @@ def update(df, conn):
         [ID]                = ?
     '''
     cur = conn.cursor()
+    cur.fast_executemany = True
     cur.executemany(update_stmt, df.values.tolist())
     conn.commit()
 
-#this pae config section must always be the first sction of code
+#this page config section must always be the first sction of streamlit code
 PAGE_TITLE = 'View and Update Data'
-PAGE_ICON = ':smile:'
+PAGE_ICON = '🗄️'
 
 
 st.set_page_config(page_title = PAGE_TITLE, page_icon = PAGE_ICON, layout = 'wide')

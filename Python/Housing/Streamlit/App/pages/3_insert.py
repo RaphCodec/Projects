@@ -37,7 +37,7 @@ def insert(df):
 
 
 PAGE_TITLE = 'Insert New Data'
-PAGE_ICON = ':smile:'
+PAGE_ICON = '🗃️'
 
 
 st.set_page_config(page_title = PAGE_TITLE, page_icon = PAGE_ICON)
