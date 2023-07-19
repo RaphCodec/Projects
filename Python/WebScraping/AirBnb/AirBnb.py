@@ -9,6 +9,7 @@ def run(playwright: Playwright) -> None:
     with page.expect_download() as download_info:
         page.get_by_role("row", name="Amsterdam listings.csv.gz Detailed Listings data").get_by_role("link").click()
     download = download_info.value
+    download.save_as('test.csv.gz')
 
     # ---------------------
     context.close()
