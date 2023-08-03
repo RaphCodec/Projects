@@ -1,6 +1,8 @@
 import pandas as pd
 import streamlit as st
 import plotly.express as px
+import pygwalker as pyg
+import psutil
 
 
 #this page config section must always be the first sction of streamlit code
@@ -14,10 +16,13 @@ st.title(':blue[DC] vs :red[Marvel]\nStats and Analysis')
 
 dc = pd.read_csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/dc-wikia-data.csv')
 marvel = pd.read_csv('https://raw.githubusercontent.com/fivethirtyeight/data/master/comic-characters/marvel-wikia-data.csv')
-dc
-marvel
 
-# st.bar_chart(dc['ALIGN'].value_counts())
+tab1, tab2, tab3 = st.tabs(["Graphs", "Data", "About"])
+
+html_output = pyg.walk(dc, env='Streamlit')
+tab2.dataframe(dc)
+tab2.dataframe(marvel)
+
 
 dcCharacterCounts = dc['ALIGN'].value_counts()
 
@@ -31,7 +36,7 @@ dcCharacterType = px.bar(x=dcCharacterCounts.index,
                          )
 dcCharacterType.update_xaxes(showgrid=False).update_yaxes(showgrid=False, range = [0,8_000])
 
-st.plotly_chart(dcCharacterType, sharing = 'streamlit')
+tab1.plotly_chart(dcCharacterType, sharing = 'streamlit')
 
 marvelCharacterCounts = marvel['ALIGN'].value_counts()
 
@@ -47,4 +52,4 @@ marvelCharacterType = px.bar(x=marvelCharacterCounts.index,
 marvelCharacterType.update_xaxes(showgrid=False).update_yaxes(showgrid=False, range = [0,8_000])
 
 
-st.plotly_chart(marvelCharacterType, sharing = 'streamlit')
+tab1.plotly_chart(marvelCharacterType, sharing = 'streamlit')
