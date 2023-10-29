@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+  <!-- Coding by CodingLab | www.codinglabweb.com -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!----======== CSS ======== -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!----===== Boxicons CSS ===== -->
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!--<title>Dashboard Sidebar Menu</title>--> 
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+</head>
+<body>
+    <nav class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                    <!--<img src="logo.png" alt="">-->
+                </span>
+
+                <div class="text logo-text">
+                    <span class="name">Codinglab</span>
+                    <span class="profession">Web developer</span>
+                </div>
+            </div>
+
+            <i class='bx bx-chevron-right toggle'></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+
+                <li class="search-box">
+                    <i class='bx bx-search icon'></i>
+                    <input type="text" placeholder="Search...">
+                </li>
+
+                <ul class="menu-links">
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-home-alt icon' ></i>
+                            <span class="text nav-text">Dashboard</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-bar-chart-alt-2 icon' ></i>
+                            <span class="text nav-text">Revenue</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-bell icon'></i>
+                            <span class="text nav-text">Notifications</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-pie-chart-alt icon' ></i>
+                            <span class="text nav-text">Analytics</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-heart icon' ></i>
+                            <span class="text nav-text">Likes</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                        <a href="#">
+                            <i class='bx bx-wallet icon' ></i>
+                            <span class="text nav-text">Wallets</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="bottom-content">
+                <li class="">
+                    <a href="#">
+                        <i class='bx bx-log-out icon' ></i>
+                        <span class="text nav-text">Logout</span>
+                    </a>
+                </li>
+
+                <li class="mode">
+                    <div class="sun-moon">
+                        <i class='bx bx-moon icon moon'></i>
+                        <i class='bx bx-sun icon sun'></i>
+                    </div>
+                    <span class="mode-text text">Dark mode</span>
+
+                    <div class="toggle-switch">
+                        <span class="switch"></span>
+                    </div>
+                </li>
+                
+            </div>
+        </div>
+
+    </nav>
+
+    <section class="home">
+        <div class="text">OrgChart</div>
+        <div class="chart-container" style="height: 1200px;"></div>
+    </section>
+
+    <script>
+        var chart;
+        d3.csv(
+          'https://raw.githubusercontent.com/bumbeishvili/sample-data/main/org.csv'
+        ).then((dataFlattened) => {
+          chart = new d3.OrgChart()
+            .container('.chart-container')
+            .data(dataFlattened)
+            .nodeWidth((d) => 250)
+            .initialZoom(0.7)
+            .nodeHeight((d) => 175)
+            .childrenMargin((d) => 40)
+            .compactMarginBetween((d) => 15)
+            .compactMarginPair((d) => 80)
+            .nodeContent(function (d, i, arr, state) {
+              return `
+              <div style="padding-top:30px;background-color:none;margin-left:1px;height:${
+                d.height
+              }px;border-radius:2px;overflow:visible">
+                <div style="height:${
+                  d.height - 32
+                }px;padding-top:0px;background-color:white;border:1px solid lightgray;">
+  
+                  <img src=" ${
+                    d.data.imageUrl
+                  }" style="margin-top:-30px;margin-left:${d.width / 2 - 30}px;border-radius:100px;width:60px;height:60px;" />
+  
+                 <div style="margin-right:10px;margin-top:15px;float:right">${
+                   d.data.id
+                 }</div>
+                 
+                 <div style="margin-top:-30px;background-color:#3AB6E3;height:10px;width:${
+                   d.width - 2
+                 }px;border-radius:1px"></div>
+  
+                 <div style="padding:20px; padding-top:35px;text-align:center">
+                     <div style="color:#111672;font-size:16px;font-weight:bold"> ${
+                       d.data.name
+                     } </div>
+                     <div style="color:#404040;font-size:16px;margin-top:4px"> ${
+                       d.data.positionName
+                     } </div>
+                 </div> 
+                 <div style="display:flex;justify-content:space-between;padding-left:15px;padding-right:15px;">
+                   <div > Manages:  ${d.data._directSubordinates} 👤</div>  
+                   <div > Oversees: ${d.data._totalSubordinates} 👤</div>    
+                 </div>
+                </div>     
+        </div>
+    `;
+            })
+            .render();
+        });
+      </script>
+    </body>
+    
+  
+
+    <script>
+        const body = document.querySelector('body'),
+      sidebar = body.querySelector('nav'),
+      toggle = body.querySelector(".toggle"),
+      searchBtn = body.querySelector(".search-box"),
+      modeSwitch = body.querySelector(".toggle-switch"),
+      modeText = body.querySelector(".mode-text");
+
+
+toggle.addEventListener("click" , () =>{
+    sidebar.classList.toggle("close");
+})
+
+searchBtn.addEventListener("click" , () =>{
+    sidebar.classList.remove("close");
+})
+
+modeSwitch.addEventListener("click" , () =>{
+    body.classList.toggle("dark");
+    
+    if(body.classList.contains("dark")){
+        modeText.innerText = "Light mode";
+    }else{
+        modeText.innerText = "Dark mode";
+        
+    }
+});
+    </script>
+
+</body>
+</html>
