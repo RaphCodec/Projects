@@ -1,0 +1,1285 @@
+{% load static %}
+<!DOCTYPE html>
+  <!-- Coding by CodingLab | www.codinglabweb.com -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    
+    <!----===== Boxicons CSS ===== -->
+    <link href='https://unpkg.com/boxicons@2.1.1/css/boxicons.min.css' rel='stylesheet'>
+    
+    <!--<title>Dashboard Sidebar Menu</title>--> 
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+     <script src="https://cdn.jsdelivr.net/npm/d3-org-chart@3.1.1"></script>
+     <script src="https://cdn.jsdelivr.net/npm/d3-flextree@2.1.2/build/d3-flextree.js"></script>
+     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.3.1/jspdf.umd.min.js"></script>
+</head>
+<style>
+  /* Google Font Import - Poppins */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+*{
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: sans-serif, bold;
+}
+
+:root{
+    /* ===== Colors ===== */
+    --body-color: #e4e4e4;
+    --sidebar-color: #FFF;
+    --primary-color: #033e0d;
+    --primary-color-light: #F6F5FF;
+    --toggle-color: #DDD;
+    --text-color: #707070;
+
+    /* ====== Transition ====== */
+    --tran-03: all 0.2s ease;
+    --tran-03: all 0.3s ease;
+    --tran-04: all 0.3s ease;
+    --tran-05: all 0.3s ease;
+}
+
+body{
+    min-height: 100vh;
+    background-color: var(--body-color);
+    transition: var(--tran-05);
+}
+
+::selection{
+    background-color: var(--primary-color);
+    color: #fff;
+}
+
+body.dark{
+    --body-color: #18191a;
+    --sidebar-color: #242526;
+    --primary-color: #3a3b3c;
+    --primary-color-light: #3a3b3c;
+    --toggle-color: #fff;
+    --text-color: #ccc;
+}
+
+/* ===== Sidebar ===== */
+ .sidebar{
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 275px;
+    padding: 10px 14px;
+    background: var(--sidebar-color);
+    transition: var(--tran-05);
+    z-index: 100;  
+}
+.sidebar.close{
+    width: 88px;
+}
+
+/* ===== Reusable code - Here ===== */
+.sidebar li{
+    height: 50px;
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.sidebar header .image,
+.sidebar .icon{
+    min-width: 60px;
+    border-radius: 6px;
+}
+
+.sidebar .icon{
+    min-width: 60px;
+    border-radius: 6px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+}
+
+.sidebar .text,
+.sidebar .icon{
+    color: var(--text-color);
+    transition: var(--tran-03);
+}
+
+.sidebar .text{
+    font-size: 17px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 1;
+}
+.sidebar.close .text{
+    opacity: 0;
+}
+/* =========================== */
+
+.sidebar header{
+    position: relative;
+}
+
+.sidebar header .image-text{
+    display: flex;
+    align-items: center;
+}
+.sidebar header .logo-text{
+    display: flex;
+    flex-direction: column;
+}
+header .image-text .name {
+    margin-top: 2px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+header .image-text .profession{
+    font-size: 12px;
+    margin-top: -2px;
+    margin-right: 2px;
+    display: block;
+}
+
+.sidebar header .image{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar header .image img{
+    width: 60px;
+    border-radius: 6px;
+}
+
+.sidebar header .toggle{
+    position: absolute;
+    top: 50%;
+    right: -25px;
+    transform: translateY(-50%) rotate(180deg);
+    height: 25px;
+    width: 25px;
+    background-color: var(--primary-color);
+    color: var(--sidebar-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: pointer;
+    transition: var(--tran-05);
+}
+
+body.dark .sidebar header .toggle{
+    color: var(--text-color);
+}
+
+.sidebar.close .toggle{
+    transform: translateY(-50%) rotate(0deg);
+}
+
+.sidebar .menu{
+    margin-top: 40px;
+    overflow-y: scroll;
+    overflow-x: hidden;
+    mask-image: linear-gradient(to top, transparent, black), linear-gradient(to left, transparent 17px, black 17px);
+    mask-size: 100% 20000px;
+    mask-position: left bottom;
+    -webkit-mask-image: linear-gradient(to top, transparent, black), linear-gradient(to left, transparent 17px, black 17px);
+    -webkit-mask-size: 100% 20000px;
+    -webkit-mask-position: left bottom;
+    transition: mask-position 0.3s, -webkit-mask-position 0.3s;
+}
+
+.sidebar .menu:hover {
+  -webkit-mask-position: left top;
+}
+
+@keyframes background {
+  from {
+    background: pink;
+  }
+  to {
+    background: #c0d6ff;
+  }
+}
+
+.wrapper {
+  float: left;
+  animation: background 5s infinite alternate;
+}
+
+.menu::-webkit-scrollbar {
+    width: 8px; /* Set the width of the scrollbar */
+}
+
+.menu::-webkit-scrollbar-thumb {
+    background-color: #888; /* Set the color of the scrollbar thumb */
+    border-radius: 4px; /* Set the border radius of the scrollbar thumb */
+}
+
+.menu::-webkit-scrollbar-track {
+    background-color: #f4f4f4; /* Set the color of the scrollbar track */
+    border-radius: 8px;
+}
+
+.sidebar li.search-box{
+    border-radius: 6px;
+    background-color: var(--primary-color-light);
+    cursor: pointer;
+    transition: var(--tran-05);
+}
+
+.sidebar li.search-box input{
+    height: 100%;
+    width: 100%;
+    outline: none;
+    border: none;
+    background-color: var(--primary-color-light);
+    color: var(--text-color);
+    border-radius: 6px;
+    font-size: 17px;
+    font-weight: 500;
+    transition: var(--tran-05);
+}
+.sidebar li a{
+    list-style: none;
+    height: 100%;
+    background-color: transparent;
+    display: flex;
+    align-items: center;
+    height: 100%;
+    width: 100%;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: var(--tran-03);
+}
+
+.sidebar li a:hover{
+    background-color: var(--primary-color);
+}
+.sidebar li a:hover .icon,
+.sidebar li a:hover .text{
+    color: var(--sidebar-color);
+}
+body.dark .sidebar li a:hover .icon,
+body.dark .sidebar li a:hover .text{
+    color: var(--text-color);
+}
+
+.sidebar .menu-bar{
+    height: calc(100% - 55px);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.menu-bar::-webkit-scrollbar{
+    display: none;
+}
+.sidebar .menu-bar .mode{
+    border-radius: 6px;
+    background-color: var(--primary-color-light);
+    position: relative;
+    transition: var(--tran-05);
+}
+
+.menu-bar .mode .sun-moon{
+    height: 50px;
+    width: 60px;
+}
+
+.mode .sun-moon i{
+    position: absolute;
+}
+.mode .sun-moon i.sun{
+    opacity: 0;
+}
+body.dark .mode .sun-moon i.sun{
+    opacity: 1;
+}
+body.dark .mode .sun-moon i.moon{
+    opacity: 0;
+}
+
+.menu-bar .bottom-content .toggle-switch{
+    position: absolute;
+    right: 0;
+    height: 100%;
+    min-width: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+}
+.toggle-switch .switch{
+    position: relative;
+    height: 22px;
+    width: 40px;
+    border-radius: 25px;
+    background-color: var(--toggle-color);
+    transition: var(--tran-05);
+}
+
+.switch::before{
+    content: '';
+    position: absolute;
+    height: 15px;
+    width: 15px;
+    border-radius: 50%;
+    top: 50%;
+    left: 5px;
+    transform: translateY(-50%);
+    background-color: var(--sidebar-color);
+    transition: var(--tran-04);
+}
+
+body.dark .switch::before{
+    left: 20px;
+}
+
+.home{
+    position: absolute;
+    top: 0;
+    left: 250px;
+    height: 100vh;
+    width: calc(100% - 250px);
+    background-color: var(--body-color);
+    transition: var(--tran-05);
+}
+.home .text{
+    font-size: 30px;
+    font-weight: 500;
+    color: var(--text-color);
+    padding: 12px 60px;
+}
+
+.sidebar.close ~ .home{
+    left: 78px;
+    height: 100vh;
+    width: calc(100% - 78px);
+}
+body.dark .home .text{
+    color: var(--text-color);
+}
+
+#AddPopup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 350px; /* Set a larger width to make it a square */
+    height: 350px; /* Set a larger height to make it a square */
+    padding: 20px;
+    background-color: #fff;
+    display: none;
+    border-radius: 15px; /* Adjusted border-radius for larger corners */
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    color: var(--text-color);
+    background-color: var(--sidebar-color);
+}
+
+.AddForm {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+
+}
+
+.AddForm input {
+    margin: 10px 0;
+    border: none;
+    border-bottom: 1px solid #000;
+    outline: none;
+    padding: 5px;
+    color: var(--text-color);
+    background-color: var(--sidebar-color);
+}
+
+.AddForm button {
+    margin: 10px 0;
+    border: 1px solid #000;
+    border-radius: 5px;
+    cursor: pointer;
+    background-color: transparent;
+    padding: 8px;
+    display: block;
+    color: var(--text-color);
+    background-color: var(--sidebar-color);
+}
+
+.close-button {
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 16px;
+}
+
+#HelpPopup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 600px;
+    max-width: 80%; /* Adjust as needed */
+    height: 600px;
+    max-height: 80vh; /* Adjust as needed */
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    overflow-y: auto; /* Enable scrolling for content */
+    color: var(--text-color);
+    background-color: var(--sidebar-color);
+}
+
+#HelpPopup p {
+    margin-bottom: 20px; /* Adjust as needed to add vertical space between paragraphs */
+}
+
+#HelpPopup::-webkit-scrollbar {
+  width: 8px;
+}
+
+#HelpPopup::-webkit-scrollbar-thumb {
+    background-color: #888; /* Set the color of the scrollbar thumb */
+    border-radius: 4px; /* Set the border radius of the scrollbar thumb */
+}
+
+#HelpPopup::-webkit-scrollbar-track {
+    background-color: #f4f4f4; /* Set the color of the scrollbar track */
+    border-radius: 8px;
+}
+
+
+.scrollable-results {
+          max-height: 150px; /* Adjust the maximum height as needed */
+          overflow-y: scroll;
+          color: var(--text-color);
+        }
+.scrollable-results::-webkit-scrollbar {
+    width: 8px; /* Set the width of the scrollbar */
+}
+
+.scrollable-results::-webkit-scrollbar-thumb {
+    background-color: #888; /* Set the color of the scrollbar thumb */
+    border-radius: 4px; /* Set the border radius of the scrollbar thumb */
+}
+
+.scrollable-results::-webkit-scrollbar-track {
+    background-color: #f4f4f4; /* Set the color of the scrollbar track */
+    border-radius: 8px;
+}
+
+/* Add this CSS to style each result item */
+.scrollable-results div {
+  padding: 5px;
+  border-bottom: 1px solid #ccc;
+}
+
+/* Add this CSS to hide excess results beyond the limit */
+.scrollable-results div:nth-child(n+6) {
+  display: none;
+}
+
+
+
+
+</style>
+<body>
+    <nav class="sidebar close">
+        <header>
+            <div class="image-text">
+                <span class="image">
+                  <img id="logoimg" src="{% static 'AnalyticsGate/dot_white_logo.svg' %}" alt="My image" style="filter: brightness(0%);">
+                </span>
+
+                <div class="text logo-text">
+                    <span class="name">APM</span>
+                    <span class="profession">Analytics and Performance</span>
+                    <span class="profession">Management</span>
+                </div>
+            </div>
+
+            <i class='bx bx-chevron-right toggle'></i>
+        </header>
+
+        <div class="menu-bar">
+            <div class="menu">
+
+                <li class="search-box">
+                    <i class='bx bx-search icon'></i>
+                    <input id="searchInput" type="text" placeholder="Search..." oninput="filterResults(this.value)" onkeypress="handleKeyPress(event)">
+                </li>
+
+                <div id="searchResults" class="scrollable-results"></div>
+
+                <ul class="menu-links">
+                    <li class="nav-link">
+                      <a href="https://dotanalytics.nycdot.nyc/">
+                            <i class='bx bx-home-alt icon' ></i>
+                            <span class="text nav-text">Home</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "FitBtn">
+                            <i class='bx bx-reset icon' ></i>
+                            <span class="text nav-text">Fit View</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "ChangeLayBtn">
+                            <i class='bx bx-sync icon' ></i>
+                            <span class="text nav-text">Rotate</span>
+                        </a>
+                    </li>
+                  
+                    <li class="nav-link">
+                      <a href="#" id="CompactBtn">
+                            <i class='bx bx-sitemap icon' ></i>
+                            <span class="text nav-text">Compact</span>
+                        </a>
+                    </li>
+                  
+                    <li class="nav-link">
+                      <a href="#" id="ZoomInBtn">
+                            <i class='bx bx-zoom-in icon' ></i>
+                            <span class="text nav-text">Zoom In</span>
+                        </a>
+                    </li>
+                  
+                    <li class="nav-link">
+                      <a href="#" id="ZoomOutBtn">
+                            <i class='bx bx-zoom-out icon' ></i>
+                            <span class="text nav-text">Zoom Out</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "CollapseAllBtn">
+                            <i class='bx bx-chevrons-up icon' ></i>
+                            <span class="text nav-text">Collapse All</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "ExpandAllBtn">
+                            <i class='bx bx-chevrons-down icon' ></i>
+                            <span class="text nav-text">Expand All</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "SalaryBtn">
+                            <i class='bx bx-dollar icon' ></i>
+                            <span class="text nav-text">Salary</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id = "HideReportsBtn">
+                            <i class='bx bx-hide icon' ></i>
+                            <span class="text nav-text">Hide Reports</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id="AddBtn">
+                            <i class='bx bx-plus icon' ></i>
+                            <span class="text nav-text">Add Position</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id="RemoveBtn">
+                            <i class='bx bx-minus icon' ></i>
+                            <span class="text nav-text">Remove</span>
+                        </a>
+                    </li>
+ 
+                    <li class="nav-link">
+                      <a href="#" id="DeselectBtn">
+                            <i class='bx bx-trash icon' ></i>
+                            <span class="text nav-text">Deselect All</span>
+                        </a>
+                    </li>
+                    
+                    <li class="nav-link">
+                      <a href="#" id="ExportImgBtn">
+                            <i class='bx bx-image icon'></i>
+                            <span class="text nav-text">Export Image</span>
+                        </a>
+                    </li>
+
+                    <li class="nav-link">
+                      <a href="#" id="ExportPDFBtn">
+                            <i class='bx bx-file icon' ></i>
+                            <span class="text nav-text">Export PDF</span>
+                        </a>
+                    </li>
+
+                </ul>
+            </div>
+
+            <div class="bottom-content">
+                <li class="">
+                    <a href="#" id="HelpBtn">
+                        <i class='bx bx-help-circle icon' ></i>
+                        <span class="text nav-text">Help</span>
+                    </a>
+                </li>
+
+                <li class="mode">
+                    <div class="sun-moon">
+                        <i class='bx bx-moon icon moon'></i>
+                        <i class='bx bx-sun icon sun'></i>
+                    </div>
+                    <span class="mode-text text">Dark mode</span>
+
+                    <div class="toggle-switch">
+                        <span class="switch"></span>
+                    </div>
+                </li>
+                
+            </div>
+        </div>
+
+    </nav>
+
+    <section class="home">
+        <div class="text">Org Chart Visualizer</div>
+        <div class="chart-container" ></div>
+        <div id="AddPopup">
+          <form id="addForm" class="AddForm">
+              <div class="close-button" onclick="closeForm()">X</div> <!-- Close button added here -->
+              <h2>Add Position</h2>
+              <input type="text" id="tempName" placeholder="Name" name="tempName" required>
+              <input type="text" id="tempT" placeholder="Title" name="tempT">
+              <input type="text" id="tempOT" placeholder="OfficeTitle" name="tempOT">
+              <input type="number" id="tempSal" placeholder="Salary" name="tempSal">
+              <button type="submit" id="addSup" class="btn">Add Above</button>
+              <button type="submit" id="addSub" class="btn">Add Below</button>
+          </form>
+      </div>
+      <!-- HTML for the Help Popup -->
+      <div id="HelpPopup" class="help-popup">
+          <div class="close-button" onclick="closeHelpPopup()">X</div>
+          <h2>Help</h2>
+          <p>
+              <strong>Search:</strong> Locate individuals currently present in the Org Chart. Note: Removed individuals are no longer searchable, and positions added with the Add Button cannot be searched for.
+          </p>
+          <p>
+              <strong>Home:</strong> Navigate to the Analytics and Performance Management homepage.
+          </p>
+          <p>
+              <strong>Fit View:</strong> Center the Org Chart on the screen.
+          </p>
+          <p>
+              <strong>Rotate:</strong> Adjust the orientation of the Org Chart (left, right, up, or down).
+          </p>
+          <p>
+              <strong>Compact:</strong> Transform the chart into a more traditional organizational layout.
+          </p>
+          <p>
+              <strong>Zoom In and Zoom Out:</strong> Manually zoom in and out of the chart. This can also be done using the scroll wheel on your mouse. The chart can be moved by clicking and dragging.
+          </p>
+          <p>
+              <strong>Collapse All:</strong> Hide everyone, displaying only the commissioner.
+          </p>
+          <p>
+              <strong>Expand All:</strong> Reveal everyone currently in the chart. Note: The more people present, the longer this process may take.
+          </p>
+          <p>
+              <strong>Salary:</strong> View the salary information of individuals you are authorized to see. Salaries will disappear if another button aside from Hide Reports, Export Image or Export PDF is clicked.
+          </p>
+          <p>
+              <strong>Hide Reports:</strong> Conceal Directs and Total reports for everyone in the chart. Reports will show if another button aside from Salary, Export Image or Export PDF is clicked..
+          </p>
+          <p>
+              <strong>Add Person:</strong> Add a vacancy to the chart. Someone can be added above or below the currently selected person or people (highlighted in red). At least one person must be selected for this functionality to work.
+          </p>
+          <p>
+              <strong>Remove:</strong> Remove the currently selected person or people (highlighted in red) from the Org Chart. Note: Individuals removed cannot be added back. Refreshing the page is required. If the commissioner is accidentally removed, a page refresh is necessary.
+          </p>
+          <p>
+              <strong>Deselect ALL:</strong> Deselect all individuals currently highlighted in red.
+          </p>
+          <p>
+              <strong>Export Image:</strong> Export a PNG image of the current chart. IF IN DARK MODE PLEASE SWICTH TO LIGHT MODE. THEN RESHOW SALARIES AND/OR REHIDE REPORTS IF DESIRED.
+          </p>
+          <p>
+              <strong>Export PDF:</strong> Export a PDF of the current chart. IF IN DARK MODE PLEASE SWICTH TO LIGHT MODE. THEN RESHOW SALARIES AND/OR REHIDE REPORTS IF DESRIRED.
+          </p>
+        </div>
+
+    </section>
+
+    <script>
+        var index = 0;
+        var compact = 0;
+        var actNdCent = 0;
+        var chart; //needed for chart to be displayed
+        var data = {{ datajson|safe }}; // data to display in chart
+
+        names = [] //stores names for search function
+        var currentlySelected = []; //stores ID's of clicked nodes
+
+        function titleCase(str) {
+          const stopWords = ['of', 'the', 'or', 'and'];
+          const words = str.split(' ');
+
+          const titleCasedWords = words.map(word => {
+            if (word === word.toUpperCase()) {
+              // If the word is already all uppercase, preserve it
+              return word;
+            } else if (stopWords.includes(word.toLowerCase())) {
+              // If the word is a stop word, preserve it in lowercase
+              return word.toLowerCase();
+            } else {
+              // Capitalize the first letter of the word
+              return word.charAt(0).toUpperCase() + word.slice(1);
+            }
+          });
+
+          return titleCasedWords.join(' ');
+        }
+
+        function downloadPdf() {
+            chart.exportImg({
+                save: false,
+                full: true,
+                onLoad: (base64) => {
+                    var pdf = new jspdf.jsPDF('landscape'); // Specify 'landscape' orientation
+                    var img = new Image();
+                    img.src = base64;
+                    img.onload = function () {
+                        var buffer = 20; // Set the buffer to 0.25 inch (20 points)
+                        var pageWidth = pdf.internal.pageSize.width - buffer * 2; // Reduce page width by 0.25 inches on each side
+                        var pageHeight = pdf.internal.pageSize.height - buffer * 2; // Reduce page height by 0.25 inches on each side
+                        var imgWidth = (img.width / img.height) * pageHeight;
+                        var imgHeight = pageHeight;
+                        
+                        // Calculate xPosition to center the image horizontally within the buffer
+                        var xPosition = (pageWidth - imgWidth) / 2 + buffer;
+                        // Calculate yPosition to center the image vertically within the buffer
+                        var yPosition = (pageHeight - imgHeight) / 2 + buffer;
+                        
+                        pdf.addImage(
+                            img,
+                            'JPEG',
+                            xPosition,
+                            yPosition,
+                            imgWidth,
+                            imgHeight
+                        );
+                        pdf.save('chart.pdf');
+                    };
+                },
+            });
+        }
+
+        for(var item of data) {
+          names.push(item.name)
+        }
+
+        // Function to remove values from the 'names' array
+        function removeValuesFromNames(valuesToRemove) {
+            names = names.filter(name => !valuesToRemove.includes(name));
+          }
+
+        var resultsContainer = document.getElementById("searchResults");
+
+        // Function to handle Enter key press
+        function handleKeyPress(event) {
+            if (event.key === "Enter") {
+              var firstResult  = document.getElementById("searchResults").firstChild;
+              if (firstResult) {
+                    // Extract the text content of the first result
+                    var keyword = firstResult.textContent.trim();
+                    searchPeople(keyword);
+                }
+                // Clear the search input field
+                document.getElementById("searchInput").value = '';
+                resultsContainer.innerHTML = "";
+            }
+        }
+
+        // Function to filter and render search results
+        function filterResults(keyword) {
+            keyword = keyword.toLowerCase();
+
+            var filteredNames = names.filter(function (name) {
+                return name.toLowerCase().includes(keyword);
+            });
+
+            resultsContainer.innerHTML = "";
+
+            if (filteredNames.length > 0) {
+                filteredNames.slice(0, 5).forEach(function (result) {
+                    var resultDiv = document.createElement("div");
+                    resultDiv.textContent = result;
+
+                    resultDiv.addEventListener("click", function() {
+                        searchPeople(result);
+                        document.getElementById("searchInput").value = '';
+                        resultsContainer.innerHTML = ""; // Clear the search results when a name is clicked
+                    });
+
+                    resultsContainer.appendChild(resultDiv);
+                });
+            } else {
+                resultsContainer.textContent = "No results found.";
+            }
+        }
+
+        function searchPeople(keyword) {
+            keyword = keyword.toLowerCase();
+
+            var result = data.find(function(item) {
+                return item.name.toLowerCase().includes(keyword);
+            });
+
+            chart.collapseAll();
+            chart.clearHighlighting();
+            chart.setUpToTheRootHighlighted(result.id).render();
+        }
+
+        // Function to toggle salary info
+        function toggleSalaryInfo() {
+            var salaryInfoElements = document.querySelectorAll('.salaryinfo');
+            salaryInfoElements.forEach(function (element) {
+                if (element.style.display !== 'none') {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';
+                }
+            });
+        }
+      
+        // Function to toggle reports
+        function toggleReports() {
+            var reportElements = document.querySelectorAll('.reports');
+            reportElements.forEach(function (element) {
+                if (element.style.display !== 'none') {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';
+                }
+            });
+        }
+        // Function to hide buttons and export png
+        function exportPNG() {
+
+            var reportElements = document.querySelectorAll('.nodeButtons');
+            reportElements.forEach(function (element) {
+                if (element.style.display !== 'none') {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';
+                }
+            });
+            chart.exportImg({full:true})
+        }
+        // Function to hide buttons and export pdf
+        function exportPDF() {
+            var reportElements = document.querySelectorAll('.nodeButtons');
+            reportElements.forEach(function (element) {
+                if (element.style.display !== 'none') {
+                    element.style.display = 'none';
+                } else {
+                    element.style.display = 'block';
+                }
+            });
+            downloadPdf()
+        }
+
+        function findChildren(parent, selected) {
+              for (const item of data) {
+                if (item.parentId === parent) {
+                  selected.push(item.name);
+                  findChildren(item.id, selected);
+                }
+              }
+            }
+
+        //Removes all currenlty selected nodes
+        function removeNodes() {
+          currentlySelected = [...new Set(currentlySelected)]
+            for ( id in currentlySelected) {
+              chart.removeNode(currentlySelected[id])
+            }
+            
+            to_pop = [];
+
+            for (const id of currentlySelected) {
+              to_pop.push(data.filter(item => item.id === id)[0].name)
+              findChildren(id, to_pop)
+            }
+
+            for (person in to_pop) {
+              names.pop(person)
+            }
+
+            to_pop = []
+            currentlySelected = []
+        }
+
+        temp_node_counter = 0; // needed for add nodes to function properly
+
+        function openForm() {
+            document.getElementById("AddPopup").style.display = "block";
+        }
+
+        function closeForm() {
+            document.getElementById("AddPopup").style.display = "none";
+            // Reset the form after closing
+            document.getElementById("addForm").reset();
+        }
+
+        function closeHelpPopup() {
+              document.getElementById('HelpPopup').style.display = 'none';
+          }
+
+        let formSubmitted = false; // Track whether the form has been submitted
+
+        function addNodes() {
+          currentlySelected = [...new Set(currentlySelected)] //making sure all values in array are unique
+            openForm();
+            var form = document.getElementById("addForm");
+    
+            // Define a single event listener for the form
+            const formSubmitHandler = function (event) {
+              event.preventDefault();
+
+              if (event.submitter.id === "addSub") {
+                if (currentlySelected.length !== 1) {
+                alert("Must have only one person selected to use Add Below");
+                chart.clearHighlighting()
+                currentlySelected = []
+              } else {
+
+                var tempname = document.getElementById("tempName").value.toUpperCase();
+                var tempT = titleCase(document.getElementById("tempT").value);
+                var tempOT = titleCase(document.getElementById("tempOT").value);
+                var tempSalInput = document.getElementById("tempSal");
+                var tempSalValue = tempSalInput.value.trim(); // Trim to handle potential leading/trailing whitespaces
+
+                // Check if tempSalValue is a valid number
+                if (!isNaN(parseFloat(tempSalValue))) {
+                  var tempSal = parseFloat(tempSalValue).toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  });
+                } else {
+                  // Set tempSal to an empty string if the input is not a valid number
+                  var tempSal = '';
+                }
+                
+
+                chart.addNode({
+                  id: "abcTemp" + temp_node_counter,
+                  parentId: currentlySelected[0],
+                  name: tempname,
+                  positionName: tempT,
+                  officetitle: tempOT,
+                  Salary: tempSal,
+                  DirectReports: '',
+                  TotalReports: '',
+                  progress: [25, 20, 15, 10],
+                  _centered: true,
+                })};
+
+                chart.clearHighlighting()
+                currentlySelected = []
+                temp_node_counter += 1;
+              } else if (event.submitter.id === "addSup") {
+             
+
+                if (currentlySelected.length === 0) {
+                alert("Must have at least 1 person selected");
+              } else {
+                parents = []
+                for ( id in currentlySelected) {
+                  person = data.filter(item => item.id === currentlySelected[id])
+                  parents.push(person[0].parentId)
+                }
+
+                parent = [...new Set(parents)]
+                
+
+                if (parent.length !== 1) {
+                  alert('Cannot choose people with different supervisors')
+                  chart.clearHighlighting()
+                  currentlySelected = []
+                } else  {               
+          
+                var tempname = document.getElementById("tempName").value.toUpperCase();
+                var tempT = titleCase(document.getElementById("tempT").value);
+                var tempOT = titleCase(document.getElementById("tempOT").value);
+                var tempSalInput = document.getElementById("tempSal");
+                var tempSalValue = tempSalInput.value.trim(); // Trim to handle potential leading/trailing whitespaces
+
+                // Check if tempSalValue is a valid number
+                if (!isNaN(parseFloat(tempSalValue))) {
+                  var tempSal = parseFloat(tempSalValue).toLocaleString('en-US', {
+                    style: 'currency',
+                    currency: 'USD'
+                  });
+                } else {
+                  // Set tempSal to an empty string if the input is not a valid number
+                  var tempSal = '';
+                }
+
+                
+                
+                //editing the cached CHART data.  DO NOT EDIT THE VAR data.
+                chart.data().push({
+                  id: "abcTemp" + temp_node_counter,
+                  parentId: parent[0],
+                  name: tempname,
+                  positionName: tempT,
+                  officetitle: tempOT,
+                  Salary: tempSal,
+                  DirectReports: '',
+                  TotalReports: '',
+                  progress: [25, 20, 15, 10],
+                  _centered: true,
+                })
+                        
+                for ( id in currentlySelected) {
+                person = data.filter(item => item.id === currentlySelected[id])
+                person[0].parentId = "abcTemp" + temp_node_counter
+              }
+              
+                chart.updateNodesState()
+                chart.clearHighlighting()
+                currentlySelected = []
+                temp_node_counter += 1;
+              }
+              }
+              }
+
+              closeForm(); // Close the form after submitting
+              form.removeEventListener("submit", formSubmitHandler); // Remove the event listener
+              formSubmitted = false;
+            };
+
+            if (!formSubmitted) {
+              form.addEventListener("submit", formSubmitHandler);
+              formSubmitted = true;
+            }
+          }
+
+          // Define a variable to keep track of the toggle state
+        let isToggleOn = false;
+        let targetColor = '#000000'; 
+
+        // Function to toggle colors
+        function toggleColors() {
+          // Toggle the state
+          isToggleOn = !isToggleOn;
+
+          // Get the target color based on the toggle state
+          targetColor = isToggleOn ? '#D3D3D3' : '#000000';
+
+          // Apply the color change to all chart links
+          chart.nodeContent(function (d, i, arr, state) {
+            var color = "#FFFFFF"
+            return `
+            <div id="nodes" style="font-family: 'Inter', sans-serif; background-color:${color}; position: absolute; margin-top:-1px; margin-left:-1px; width:${d.width}px; height:${d.height}px; border: 4px solid; border-color: ${targetColor}; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                  <div style="color:#08011E; position: absolute; right: 20px; top: 17px; font-size: 10px;"><i class="fas fa-ellipsis-h"></i></div>
+                  <div style="font-size: 15px; color:#08011E; margin-left: 20px; margin-top: 32px">${d.data.name}</div>
+                  <div style="color: #716E7B; margin-left: 20px; margin-top: 3px; font-size: 15px;"> ${d.data.positionName} </div>
+                  <div style="color: #716E7B; margin-left: 20px; margin-top: 3px; font-size: 13px;"> ${d.data.officetitle} </div>
+                  <div class="salaryinfo" style="color: #716E7B; display: none; margin-left: 20px; margin-top: 3px; font-size: 15px;"> ${d.data.Salary} </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-left: 15px; padding-right: 15px;">
+                  <div class="reports" style="display: block; font-size: 15px"> Directs: ${d.data.DirectReports} 👤</div>  
+                  <div class="reports" style="display: block; font-size: 15px"> Total: ${d.data.TotalReports} 👤</div>  
+              </div>
+          </div>
+            `;
+          }).linkUpdate(function (d, i, arr) {
+                    d3.select(this)
+                      .attr('stroke', (d) =>
+                        d.data._upToTheRootHighlighted ? '#E27396' : targetColor
+                      )
+                      .attr('stroke-width', (d) =>
+                        d.data._upToTheRootHighlighted ? 5 : 3
+                      );
+
+                    if (d.data._upToTheRootHighlighted) {
+                      d3.select(this).raise();
+                    }
+                  })
+                  .render()
+
+         }
+
+        chart = new d3.OrgChart()
+          .container('.chart-container')
+          .data(data)
+          .nodeWidth((d) => 275)
+          .initialZoom(0.7)
+          .nodeHeight((d) => 200)
+          .childrenMargin((d) => 40)
+          .compactMarginBetween((d) => 25)
+          .compactMarginPair((d) => 80)
+          .neighbourMargin((a, b) => 25)      
+          .buttonContent(({ node, state }) => {
+            return `<div class="nodeButtons" style="color:#000000;border-radius:5px;padding:3px;font-size:10px;margin:auto auto;background-color:#D3D3D3;border: 1px solid #000000"> <span style="font-size:9px">${
+              node.children
+                ? `<i class="bx bx-chevron-up icon"></i>`
+                : `<i class="bx bx-chevron-down icon"></i>`
+            }</span> ${node.data._directSubordinates}  </div>`;
+          })
+          .nodeContent(function (d, i, arr, state) {
+            var color = "#FFFFFF"
+            return `
+            <div id="nodes" style="font-family: 'Inter', sans-serif; background-color:${color}; position: absolute; margin-top:-1px; margin-left:-1px; width:${d.width}px; height:${d.height}px; border: 4px solid; border-color: #000000; border-radius: 10px; display: flex; flex-direction: column; justify-content: space-between;">
+              <div>
+                  <div style="color:#08011E; position: absolute; right: 20px; top: 17px; font-size: 10px;"><i class="fas fa-ellipsis-h"></i></div>
+                  <div style="font-size: 15px; color:#08011E; margin-left: 20px; margin-top: 32px">${d.data.name}</div>
+                  <div style="color: #716E7B; margin-left: 20px; margin-top: 3px; font-size: 15px;"> ${d.data.positionName} </div>
+                  <div style="color: #716E7B; margin-left: 20px; margin-top: 3px; font-size: 13px;"> ${d.data.officetitle} </div>
+                  <div class="salaryinfo" style="color: #716E7B; display: none; margin-left: 20px; margin-top: 3px; font-size: 15px;"> ${d.data.Salary} </div>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding-left: 15px; padding-right: 15px;">
+                  <div class="reports" style="display: block; font-size: 15px"> Directs: ${d.data.DirectReports} 👤</div>  
+                  <div class="reports" style="display: block; font-size: 15px"> Total: ${d.data.TotalReports} 👤</div>  
+              </div>
+          </div>
+            `;
+          })
+          .onNodeClick( function(d) {
+            chart.setHighlighted(d.id).render()
+            currentlySelected.push(d.id)
+          })
+          .linkUpdate(function (d, i, arr) {
+            d3.select(this)
+              .attr('stroke', (d) =>
+                d.data._upToTheRootHighlighted ? '#E27396' : '#000000'
+              )
+              .attr('stroke-width', (d) =>
+                d.data._upToTheRootHighlighted ? 5 : 3
+              );
+
+            if (d.data._upToTheRootHighlighted) {
+              d3.select(this).raise();
+            }
+          })
+          .render();
+      </script>
+    </body>
+
+    <script>
+      const body = document.querySelector('body'),
+      sidebar = body.querySelector('nav'),
+      toggle = body.querySelector(".toggle"),
+      searchBtn = body.querySelector(".search-box"),
+      modeSwitch = body.querySelector(".toggle-switch"),
+      modeText = body.querySelector(".mode-text");
+
+      //menu buttons
+      document.getElementById('FitBtn').addEventListener('click', function() {
+        chart.fit()
+        });
+        
+      document.getElementById('ChangeLayBtn').addEventListener('click', function() {
+        chart.layout(["right","bottom","left","top"][index++%4]).render().fit()
+        });
+        
+      document.getElementById('CompactBtn').addEventListener('click', function() {
+        chart.compact(!!(compact++%2)).render().fit()
+        });
+        
+      document.getElementById('ZoomInBtn').addEventListener('click', function() {
+        chart.zoomIn()
+        });
+        
+      document.getElementById('ZoomOutBtn').addEventListener('click', function() {
+        chart.zoomOut()
+        });
+
+      document.getElementById('CollapseAllBtn').addEventListener('click', function() {
+        chart.collapseAll()
+        });
+        
+      document.getElementById('ExpandAllBtn').addEventListener('click', function() {
+        chart.expandAll()
+        });
+        
+      document.getElementById('SalaryBtn').addEventListener('click', function() {
+          toggleSalaryInfo()
+        });
+
+      document.getElementById('HideReportsBtn').addEventListener('click', function() {
+          toggleReports()
+        });
+
+      document.getElementById('AddBtn').addEventListener('click', function() {
+        addNodes()
+        });
+
+      document.getElementById('RemoveBtn').addEventListener('click', function() {
+        removeNodes()
+        });
+
+      document.getElementById('ExportImgBtn').addEventListener('click', function() {
+        exportPNG()
+        });
+
+      document.getElementById('ExportPDFBtn').addEventListener('click', function() {
+        exportPDF()
+        });
+
+      document.getElementById('DeselectBtn').addEventListener('click', function() {
+        currentlySelected = [];chart.clearHighlighting()
+        });
+
+      document.getElementById('HelpBtn').addEventListener('click', function() {
+            document.getElementById('HelpPopup').style.display = 'block';
+        });
+
+
+      toggle.addEventListener("click" , () =>{
+          sidebar.classList.toggle("close");
+      })
+
+
+      searchBtn.addEventListener("click" , () =>{
+          sidebar.classList.remove("close");
+      })
+
+      modeSwitch.addEventListener("click" , () =>{
+          body.classList.toggle("dark");
+          
+          if(body.classList.contains("dark")){
+              modeText.innerText = "Light mode";
+              toggleColors()
+              document.getElementById('logoimg').style.filter = "brightness(100%)"
+          }else{
+              modeText.innerText = "Dark mode";
+              toggleColors()
+              document.getElementById('logoimg').style.filter = "brightness(0%)"
+          }
+      });
+    </script>
+
+</body>
+</html>
