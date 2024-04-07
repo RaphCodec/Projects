@@ -7,6 +7,7 @@ from loguru import logger
 from json import dumps
 from icecream import ic
 
+
 def CreateTable(
     df,
     table: str = None,
@@ -49,7 +50,7 @@ def CreateTable(
     # Generate CREATE TABLE query
     query = f"CREATE TABLE IF NOT EXISTS {table} ({columns_query}"
 
-    #adding Foreign Keys
+    # adding Foreign Keys
     if parent_table and parent_fk_column and table_fk_column:
         for p_table, p_column, t_column in zip(
             parent_table, parent_fk_column, table_fk_column
@@ -66,24 +67,48 @@ def CreateTable(
 
     return
 
-def Insert(table: str, df) -> None:
+def Upsert(df, table: str, pk: str) -> None:
     # create and connect to sqlite3 database
     conn = sqlite3.connect(DB)
     cursor = conn.cursor()
 
-    # insert data into table
-    cursor.executemany(
-        f"""Insert into {table}
-                        values({('?,' * len(df.columns))[:-1]})
-                        """,
-        df.values.tolist(),
-    )
+    DIT = pd.read_sql(f"Select {pk} FROM {table}", conn)
 
-    conn.commit()
+    #filtering existing and new rows
+    df_insert = df[~df[pk].isin(DIT[pk].tolist())]
+    df_update = df[df[pk].isin(DIT[pk].tolist())]
+
+    if not df_insert.empty:
+        # insert data into table
+        cursor.executemany(
+            f"""Insert into {table}
+                            values({('?,' * len(df_insert.columns))[:-1]})
+                            """,
+            df_insert.values.tolist(),
+        )
+
+        conn.commit()
+    logger.info(f"Rows inserted: {len(df_insert)}")
+
+    if not df_update.empty:
+        placeholders = ", ".join(
+            [f"{col} = ?" for col in df_update.columns if col != pk]
+        )
+        cursor.executemany(
+            f"""UPDATE {table}
+                    SET {placeholders}
+                    WHERE {pk} = ?
+                    """,
+            df_update.values.tolist(),
+        )
+
+        conn.commit()
+    logger.info(f"Rows updated: {len(df)}")
+
     conn.close  # close conncection
 
-def main():
 
+def main():
     # making broswer object and opening url
     browser = mechanicalsoup.StatefulBrowser()
     browser.open(URL)
@@ -95,6 +120,7 @@ def main():
     data = [value.text.replace("\n", "") for value in td]
     titles(data)
     reigns(data)
+
 
 def titles(data):
     # slicing list to get data for each wwe championship change
@@ -116,8 +142,9 @@ def titles(data):
     # creating a column to count order of titles and act as a primary key
     df.insert(loc=0, column="TitleID", value=df.index + 1)
 
-    CreateTable(df, TABLE_5, 'TitleID')
-    Insert(TABLE_5, df)
+    CreateTable(df, TABLE_5, "TitleID")
+    Upsert(df, TABLE_5, "TitleID")
+
 
 def reigns(data):
     # slicing list to get data for each wwe championship change
@@ -209,8 +236,8 @@ def reigns(data):
     reigns["Days"] = reigns["Days"].str.rstrip("+")
     reigns["DaysRecog"] = reigns["DaysRecog"].str.rstrip("+")
     reigns["Date"] = pd.to_datetime(reigns["Date"])
-    #changing back to str after formatting since sqlite does not have date type
-    reigns["Date"] = reigns["Date"].astype(str) 
+    # changing back to str after formatting since sqlite does not have date type
+    reigns["Date"] = reigns["Date"].astype(str)
 
     # creating a column to count order of champs and act as a primary key
     reigns.insert(loc=0, column="ID", value=reigns.index)
@@ -236,8 +263,6 @@ def reigns(data):
         Locations.set_index("Location")["LocationID"].to_dict()
     )
 
-    
-
     CreateTable(Champions, TABLE_2, "ChampionID")
     CreateTable(Events, TABLE_3, "EventID")
     CreateTable(Locations, TABLE_4, "LocationID")
@@ -251,10 +276,10 @@ def reigns(data):
     )
 
     # inserting data into sqlite3 database
-    Insert(TABLE_2,Champions)
-    Insert(TABLE_3,Events)
-    Insert(TABLE_4,Locations)
-    Insert(TABLE_1,reigns)
+    Upsert(Champions, TABLE_2, "ChampionID")
+    Upsert(Events, TABLE_3, "EventID")
+    Upsert(Locations, TABLE_4, "LocationID")
+    Upsert(reigns, TABLE_1, "ID")
 
 
 if __name__ == "__main__":
